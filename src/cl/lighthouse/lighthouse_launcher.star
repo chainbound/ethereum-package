@@ -182,7 +182,7 @@ def launch(
         port_id=BEACON_HTTP_PORT_ID,
         extract={
             "enr": ".data.enr",
-            "multiaddr": ".data.p2p_addresses[0]",
+            "multiaddr": ".data.discovery_addresses[0]",
             "peer_id": ".data.peer_id",
         },
     )
