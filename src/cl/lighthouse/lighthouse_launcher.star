@@ -266,7 +266,7 @@ def get_beacon_config(
     cmd = [
         LIGHTHOUSE_BINARY_COMMAND,
         "beacon_node",
-        "--debug-level=" + log_level,
+        "--debug-level=trace", # + log_level,
         "--datadir=" + BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER,
         # vvvvvvvvvvvvvvvvvvv REMOVE THESE WHEN CONNECTING TO EXTERNAL NET vvvvvvvvvvvvvvvvvvvvv
         "--disable-enr-auto-update",
