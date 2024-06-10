@@ -275,9 +275,9 @@ def get_beacon_config(
         # "--enr-tcp-port={0}".format(BEACON_DISCOVERY_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ REMOVE THESE WHEN CONNECTING TO EXTERNAL NET ^^^^^^^^^^^^^^^^^^^^^
         "--listen-address=0.0.0.0",
-        "--port={0}".format(
-            BEACON_DISCOVERY_PORT_NUM
-        ),  # NOTE: Remove for connecting to external net!
+        # "--port={0}".format(
+        #     BEACON_DISCOVERY_PORT_NUM
+        # ),  # NOTE: Remove for connecting to external net!
         "--http",
         "--http-address=0.0.0.0",
         "--http-port={0}".format(BEACON_HTTP_PORT_NUM),
