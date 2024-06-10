@@ -193,7 +193,7 @@ def calculate_devnet_url(network):
         devnet_name.split("-")[1] + "-" if len(devnet_name.split("-")) > 1 else ""
     )
 
-    return "github.com/ethpandaops/{0}-devnets/network-configs/{1}{2}-{3}".format(
+    return "github.com/Commit-Boost/{0}-devnets/network-configs/{1}{2}-{3}".format(
         devnet_category, devnet_subname, network_type, devnet_number
     )
 
