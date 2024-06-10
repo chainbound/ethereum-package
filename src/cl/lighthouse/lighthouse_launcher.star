@@ -301,7 +301,6 @@ def get_beacon_config(
         # Enable this flag once we have https://github.com/sigp/lighthouse/issues/5054 fixed
         # "--allow-insecure-genesis-sync",
         "--enable-private-discovery",
-        "--disable-peer-scoring", # NEEDED FOR CONNECTING TO EXtERNAL NET!
     ]
 
     if network not in constants.PUBLIC_NETWORKS:
