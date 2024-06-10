@@ -269,10 +269,10 @@ def get_beacon_config(
         "--debug-level=" + log_level,
         "--datadir=" + BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER,
         # vvvvvvvvvvvvvvvvvvv REMOVE THESE WHEN CONNECTING TO EXTERNAL NET vvvvvvvvvvvvvvvvvvvvv
-        "--disable-enr-auto-update",
-        "--enr-address=" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        "--enr-udp-port={0}".format(BEACON_DISCOVERY_PORT_NUM),
-        "--enr-tcp-port={0}".format(BEACON_DISCOVERY_PORT_NUM),
+        # "--disable-enr-auto-update",
+        # "--enr-address=" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        # "--enr-udp-port={0}".format(BEACON_DISCOVERY_PORT_NUM),
+        # "--enr-tcp-port={0}".format(BEACON_DISCOVERY_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ REMOVE THESE WHEN CONNECTING TO EXTERNAL NET ^^^^^^^^^^^^^^^^^^^^^
         "--listen-address=0.0.0.0",
         "--port={0}".format(
