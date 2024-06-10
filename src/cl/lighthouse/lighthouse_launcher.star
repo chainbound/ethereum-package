@@ -320,9 +320,9 @@ def get_beacon_config(
                     )
                 )
         elif network == constants.NETWORK_NAME.ephemery:
-            cmd.append(
-                "--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network]
-            )
+            # cmd.append(
+            #     "--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network]
+            # )
             cmd.append(
                 "--boot-nodes="
                 + shared_utils.get_devnet_enrs_list(
