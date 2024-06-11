@@ -1,5 +1,5 @@
 participants:
-# EL
+  # EL
   - el_type: geth
     el_image: ethereum/client-go:latest
     el_log_level: ""
@@ -12,7 +12,7 @@ participants:
     el_max_cpu: 0
     el_min_mem: 0
     el_max_mem: 0
-# CL
+    # CL
     cl_type: lighthouse
     cl_image: sigp/lighthouse:latest
     cl_log_level: ""
@@ -26,7 +26,7 @@ participants:
     cl_min_mem: 0
     cl_max_mem: 0
     use_separate_vc: true
-# Validator
+    # Validator
     vc_type: lighthouse
     vc_image: sigp/lighthouse:latest
     vc_log_level: ""
@@ -39,7 +39,7 @@ participants:
     vc_min_mem: 0
     vc_max_mem: 0
     validator_count: null
-# participant specific
+    # participant specific
     node_selectors: {}
     tolerations: []
     count: 2
@@ -58,12 +58,12 @@ network_params:
   # network_id: "3151908"
   # deposit_contract_address: "0x4242424242424242424242424242424242424242"
   # seconds_per_slot: 12
-  # num_validator_keys_per_node: 64
-  # preregistered_validator_keys_mnemonic:
-  #   "giant issue aisle success illegal bike spike
-  #   question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy
-  #   very lucky have athlete"
-  # preregistered_validator_count: 0
+  num_validator_keys_per_node: 64
+  preregistered_validator_keys_mnemonic:
+    "giant issue aisle success illegal bike spike
+    question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy
+    very lucky have athlete"
+  preregistered_validator_count: 0
   # genesis_delay: 20
   # max_churn: 8
   # ejection_balance: 16000000000
