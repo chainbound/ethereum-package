@@ -2,6 +2,9 @@ shared_utils = import_module("../shared_utils/shared_utils.star")
 el_cl_genesis_data = import_module(
     "../prelaunch_data_generator/el_cl_genesis/el_cl_genesis_data.star"
 )
+validator_keystores = import_module(
+    "../prelaunch_data_generator/validator_keystores/validator_keystore_generator.star"
+)
 
 
 def launch(plan, network_params, participants, cancun_time, prague_time):
