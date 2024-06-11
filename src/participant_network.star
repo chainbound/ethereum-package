@@ -184,6 +184,8 @@ def launch_participant_network(
         prysm_password_artifact_uuid,
     )
 
+    plan.print("Preregistered validator keys for nodes: {0}".format(preregistered_validator_keys_for_nodes))
+
     ethereum_metrics_exporter_context = None
     all_ethereum_metrics_exporter_contexts = []
     all_xatu_sentry_contexts = []
@@ -280,6 +282,8 @@ def launch_participant_network(
         if participant.validator_count != 0:
             vc_keystores = preregistered_validator_keys_for_nodes[index]
 
+        plan.print("VC keystores: {0}".format(vc_keystores))
+
         vc_context = None
         snooper_beacon_context = None
 
@@ -338,7 +342,7 @@ def launch_participant_network(
             network=network_params.network,
             electra_fork_epoch=network_params.electra_fork_epoch,
         )
-        plan.print("Successfully added validator. Service: {0}".format(vc_context.service_name))
+        plan.print("Successfully added validator. Service: {0}".format(vc_context))
         all_vc_contexts.append(vc_context)
 
         if vc_context and vc_context.metrics_info:
