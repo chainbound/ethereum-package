@@ -338,6 +338,7 @@ def launch_participant_network(
             network=network_params.network,
             electra_fork_epoch=network_params.electra_fork_epoch,
         )
+        plan.print("Successfully added validator. Service: {0}".format(vc_context.service_name))
         all_vc_contexts.append(vc_context)
 
         if vc_context and vc_context.metrics_info:
@@ -382,6 +383,9 @@ def launch_participant_network(
         )
 
         all_participants.append(participant_entry)
+
+
+    plan.print("Successfully added all participants to network")
 
     return (
         all_participants,
