@@ -36,6 +36,8 @@ def launch(plan, network_params, participants, cancun_time, prague_time):
 
     # We actually need validator keystores for this external devnet
     # validator_data = None
+    plan.print("Generating validator keystores")
+    plan.print("mnemonic: ".format(network_params.preregistered_validator_keys_mnemonic))
     validator_data = validator_keystores.generate_validator_keystores(
             plan, network_params.preregistered_validator_keys_mnemonic, participants
     )
