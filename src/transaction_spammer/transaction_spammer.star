@@ -38,9 +38,9 @@ def get_config(
 ):
     # Temp hack to use the old tx-fuzz image until we can get the new one working
     if electra_fork_epoch != None:
-        tx_spammer_image = "ghcr.io/chainbound/tx-fuzz:0.1.0"
+        tx_spammer_image = "ghcr.io/chainbound/tx-fuzz:0.1.0-amd64"
     else:
-        tx_spammer_image = "ghcr.io/chainbound/tx-fuzz:0.1.0"
+        tx_spammer_image = "ghcr.io/chainbound/tx-fuzz:0.1.0-amd64"
 
     cmd = [
         "spam",
