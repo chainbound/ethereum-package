@@ -126,6 +126,7 @@ def launch_participant_network(
         ) = launch_ephemery.launch(plan, cancun_time, prague_time)
     else:
         # We are running a devnet
+        plan.print("running devnet, net params: {0}".format(network_params))
         (
             el_cl_data,
             final_genesis_timestamp,
