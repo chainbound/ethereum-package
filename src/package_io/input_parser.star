@@ -187,7 +187,8 @@ def input_parser(plan, input_args):
                 vc_max_cpu=participant["vc_max_cpu"],
                 vc_min_mem=participant["vc_min_mem"],
                 vc_max_mem=participant["vc_max_mem"],
-                validator_count=participant["validator_count"],
+                # hardcoded for debugging
+                validator_count=64, # participant["validator_count"],
                 tolerations=participant["tolerations"],
                 node_selectors=participant["node_selectors"],
                 snooper_enabled=participant["snooper_enabled"],

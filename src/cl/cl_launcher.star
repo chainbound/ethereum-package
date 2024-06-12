@@ -91,9 +91,9 @@ def launch(
     all_cl_contexts = []
     preregistered_validator_keys_for_nodes = (
         validator_data.per_node_keystores
-        if network_params.network == constants.NETWORK_NAME.kurtosis
-        or constants.NETWORK_NAME.shadowfork in network_params.network
-        else None
+        # if network_params.network == constants.NETWORK_NAME.kurtosis
+        # or constants.NETWORK_NAME.shadowfork in network_params.network
+        # else None
     )
 
     for index, participant in enumerate(participants):

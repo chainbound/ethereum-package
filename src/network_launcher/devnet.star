@@ -2,11 +2,14 @@ shared_utils = import_module("../shared_utils/shared_utils.star")
 el_cl_genesis_data = import_module(
     "../prelaunch_data_generator/el_cl_genesis/el_cl_genesis_data.star"
 )
+validator_keystores = import_module(
+    "../prelaunch_data_generator/validator_keystores/validator_keystore_generator.star"
+)
 
 
-def launch(plan, network, cancun_time, prague_time):
+def launch(plan, network_params, participants, cancun_time, prague_time):
     # We are running a devnet
-    url = shared_utils.calculate_devnet_url(network)
+    url = shared_utils.calculate_devnet_url(network_params.network)
     el_cl_genesis_uuid = plan.upload_files(
         src=url,
         name="el_cl_genesis",
@@ -30,5 +33,14 @@ def launch(plan, network, cancun_time, prague_time):
     network_id = shared_utils.read_genesis_network_id_from_config(
         plan, el_cl_genesis_data_uuid.files_artifacts[0]
     )
-    validator_data = None
+
+    # We actually need validator keystores for this external devnet
+    # validator_data = None
+    plan.print("Generating validator keystores. net params: {0}".format(network_params))
+    plan.print(json.indent(json.encode(participants)))
+    validator_data = validator_keystores.generate_validator_keystores(
+            plan, network_params.preregistered_validator_keys_mnemonic, participants
+    )
+    plan.print(json.indent(json.encode(validator_data)))
+
     return el_cl_data, final_genesis_timestamp, network_id, validator_data

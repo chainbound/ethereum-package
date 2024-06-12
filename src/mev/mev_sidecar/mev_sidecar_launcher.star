@@ -15,6 +15,7 @@ MEV_SIDECAR_MAX_MEMORY = 1024
 
 def launch_mev_sidecar(
     plan,
+    index,
     mev_params,
     node_selectors,
     mev_boost_context,
@@ -27,7 +28,7 @@ def launch_mev_sidecar(
     }
 
     api = plan.add_service(
-        name=MEV_SIDECAR_ENDPOINT,
+        name=MEV_SIDECAR_ENDPOINT + "-" + index,
         config=ServiceConfig(
             image=image,
             cmd=[
@@ -40,7 +41,9 @@ def launch_mev_sidecar(
                 "--mevboost-url",
                 mev_boost_context_util.mev_boost_endpoint(mev_boost_context),
                 "--beacon-client-url",
-                beacon_client_url
+                beacon_client_url,
+                "--commit-boost-url",
+                "http://172.17.0.1:33950",
             ],
             # + mev_params.mev_relay_api_extra_args,
             ports={

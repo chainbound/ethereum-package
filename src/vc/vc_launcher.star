@@ -51,6 +51,7 @@ def launch(
     electra_fork_epoch,  # TODO: remove when deneb rebase is done
 ):
     if node_keystore_files == None:
+        plan.print("No validator keys found for {0}".format(service_name))
         return None
 
     tolerations = input_parser.get_client_tolerations(

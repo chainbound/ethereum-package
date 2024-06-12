@@ -126,6 +126,7 @@ def generate_validator_keystores(plan, mnemonic, participants):
     for idx, participant in enumerate(participants):
         output_dirpath = all_output_dirpaths[idx]
         if participant.validator_count == 0:
+            plan.print("No validators for participant, skipping keystore")
             keystore_files.append(None)
             continue
         padded_idx = shared_utils.zfill_custom(idx + 1, len(str(len(participants))))

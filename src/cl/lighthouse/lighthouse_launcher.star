@@ -182,7 +182,7 @@ def launch(
         port_id=BEACON_HTTP_PORT_ID,
         extract={
             "enr": ".data.enr",
-            "multiaddr": ".data.p2p_addresses[0]",
+            "multiaddr": "", # BOLT: readd this later
             "peer_id": ".data.peer_id",
         },
     )
@@ -269,15 +269,15 @@ def get_beacon_config(
         "--debug-level=" + log_level,
         "--datadir=" + BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER,
         # vvvvvvvvvvvvvvvvvvv REMOVE THESE WHEN CONNECTING TO EXTERNAL NET vvvvvvvvvvvvvvvvvvvvv
-        "--disable-enr-auto-update",
-        "--enr-address=" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        "--enr-udp-port={0}".format(BEACON_DISCOVERY_PORT_NUM),
-        "--enr-tcp-port={0}".format(BEACON_DISCOVERY_PORT_NUM),
+        # "--disable-enr-auto-update",
+        # "--enr-address=" + "10.1.0.95", # PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        # "--enr-udp-port=50003", # "--enr-udp-port={0}".format(BEACON_DISCOVERY_PORT_NUM),
+        # "--enr-tcp-port=50003", # "--enr-tcp-port={0}".format(BEACON_DISCOVERY_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ REMOVE THESE WHEN CONNECTING TO EXTERNAL NET ^^^^^^^^^^^^^^^^^^^^^
         "--listen-address=0.0.0.0",
-        "--port={0}".format(
-            BEACON_DISCOVERY_PORT_NUM
-        ),  # NOTE: Remove for connecting to external net!
+        # "--port={0}".format(
+        #     BEACON_DISCOVERY_PORT_NUM
+        # ),  # NOTE: Remove for connecting to external net!
         "--http",
         "--http-address=0.0.0.0",
         "--http-port={0}".format(BEACON_HTTP_PORT_NUM),
@@ -320,9 +320,9 @@ def get_beacon_config(
                     )
                 )
         elif network == constants.NETWORK_NAME.ephemery:
-            cmd.append(
-                "--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network]
-            )
+            # cmd.append(
+            #     "--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network]
+            # )
             cmd.append(
                 "--boot-nodes="
                 + shared_utils.get_devnet_enrs_list(
@@ -331,12 +331,12 @@ def get_beacon_config(
             )
         else:  # Devnets
             # TODO Remove once checkpoint sync is working for verkle
-            if constants.NETWORK_NAME.verkle not in network:
-                cmd.append(
-                    "--checkpoint-sync-url=https://checkpoint-sync.{0}.ethpandaops.io".format(
-                        network
-                    )
-                )
+            # if constants.NETWORK_NAME.verkle not in network:
+                # cmd.append(
+                #     "--checkpoint-sync-url=https://checkpoint-sync.{0}.ethpandaops.io".format(
+                #         network
+                #     )
+                # )
             cmd.append(
                 "--boot-nodes="
                 + shared_utils.get_devnet_enrs_list(
@@ -345,7 +345,7 @@ def get_beacon_config(
             )
     else:  # Public networks
         cmd.append("--network=" + network)
-        cmd.append("--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network])
+        # cmd.append("--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network])
 
     if len(extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark

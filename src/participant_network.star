@@ -126,12 +126,14 @@ def launch_participant_network(
         ) = launch_ephemery.launch(plan, cancun_time, prague_time)
     else:
         # We are running a devnet
+        plan.print("running devnet, net params: {0}".format(network_params))
         (
             el_cl_data,
             final_genesis_timestamp,
             network_id,
             validator_data,
-        ) = launch_devnet.launch(plan, network_params.network, cancun_time, prague_time)
+        ) = launch_devnet.launch(plan, network_params, participants, cancun_time, prague_time)
+        plan.print("Devnet validator data: {0}".format(validator_data))
 
     # Launch all execution layer clients
     all_el_contexts = el_client_launcher.launch(
@@ -183,6 +185,8 @@ def launch_participant_network(
         prysm_password_relative_filepath,
         prysm_password_artifact_uuid,
     )
+
+    plan.print("Preregistered validator keys for nodes: {0}".format(preregistered_validator_keys_for_nodes))
 
     ethereum_metrics_exporter_context = None
     all_ethereum_metrics_exporter_contexts = []
@@ -280,6 +284,8 @@ def launch_participant_network(
         if participant.validator_count != 0:
             vc_keystores = preregistered_validator_keys_for_nodes[index]
 
+        plan.print("VC keystores: {0}".format(vc_keystores))
+
         vc_context = None
         snooper_beacon_context = None
 
@@ -338,6 +344,7 @@ def launch_participant_network(
             network=network_params.network,
             electra_fork_epoch=network_params.electra_fork_epoch,
         )
+        plan.print("Successfully added validator. Service: {0}".format(vc_context))
         all_vc_contexts.append(vc_context)
 
         if vc_context and vc_context.metrics_info:
@@ -382,6 +389,9 @@ def launch_participant_network(
         )
 
         all_participants.append(participant_entry)
+
+
+    plan.print("Successfully added all participants to network")
 
     return (
         all_participants,
