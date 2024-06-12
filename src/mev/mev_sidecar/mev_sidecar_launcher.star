@@ -41,7 +41,9 @@ def launch_mev_sidecar(
                 "--mevboost-url",
                 mev_boost_context_util.mev_boost_endpoint(mev_boost_context),
                 "--beacon-client-url",
-                beacon_client_url
+                beacon_client_url,
+                "--commit-boost-url",
+                "http://172.17.0.1:33950",
             ],
             # + mev_params.mev_relay_api_extra_args,
             ports={
