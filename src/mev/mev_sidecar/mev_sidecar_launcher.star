@@ -15,6 +15,7 @@ MEV_SIDECAR_MAX_MEMORY = 1024
 
 def launch_mev_sidecar(
     plan,
+    index,
     mev_params,
     node_selectors,
     mev_boost_context,
@@ -27,7 +28,7 @@ def launch_mev_sidecar(
     }
 
     api = plan.add_service(
-        name=MEV_SIDECAR_ENDPOINT,
+        name=MEV_SIDECAR_ENDPOINT + "-" + index,
         config=ServiceConfig(
             image=image,
             cmd=[

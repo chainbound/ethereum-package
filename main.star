@@ -287,6 +287,7 @@ def run(plan, args={}):
                 # add mev-sidecar
                 mev_sidecar.launch_mev_sidecar(
                     plan,
+                    str(index),
                     mev_params,
                     global_node_selectors,
                     mev_boost_context,
