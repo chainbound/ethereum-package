@@ -27,26 +27,25 @@ BEACON_MIN_MEMORY = 1024
 
 BEACON_METRICS_PATH = "/metrics"
 
-VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER = "/validator-keys"
-
 MIN_PEERS = 1
 
-PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
-BEACON_USED_PORTS = {
-    BEACON_TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        BEACON_DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-    BEACON_UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        BEACON_DISCOVERY_PORT_NUM, shared_utils.UDP_PROTOCOL
-    ),
-    BEACON_HTTP_PORT_ID: shared_utils.new_port_spec(
-        BEACON_HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-    BEACON_METRICS_PORT_ID: shared_utils.new_port_spec(
-        BEACON_METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-}
+def get_used_ports(discovery_port):
+    beacon_used_ports = {
+        BEACON_TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+            discovery_port, shared_utils.TCP_PROTOCOL
+        ),
+        BEACON_UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+            discovery_port, shared_utils.UDP_PROTOCOL
+        ),
+        BEACON_HTTP_PORT_ID: shared_utils.new_port_spec(
+            BEACON_HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL
+        ),
+        BEACON_METRICS_PORT_ID: shared_utils.new_port_spec(
+            BEACON_METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL
+        ),
+    }
+    return beacon_used_ports
 
 
 ENTRYPOINT_ARGS = ["sh", "-c"]
@@ -90,6 +89,9 @@ def launch(
     node_selectors,
     use_separate_vc,
     keymanager_enabled,
+    checkpoint_sync_enabled,
+    checkpoint_sync_url,
+    port_publisher,
 ):
     beacon_service_name = "{0}".format(service_name)
     log_level = input_parser.get_client_log_level_or_default(
@@ -150,6 +152,9 @@ def launch(
         cl_volume_size,
         tolerations,
         node_selectors,
+        checkpoint_sync_enabled,
+        checkpoint_sync_url,
+        port_publisher,
     )
 
     beacon_service = plan.add_service(service_name, config)
@@ -229,16 +234,19 @@ def get_beacon_config(
     cl_volume_size,
     tolerations,
     node_selectors,
+    checkpoint_sync_enabled,
+    checkpoint_sync_url,
+    port_publisher,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
     if node_keystore_files:
         validator_keys_dirpath = shared_utils.path_join(
-            VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
+            constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
             node_keystore_files.teku_keys_relative_dirpath,
         )
         validator_secrets_dirpath = shared_utils.path_join(
-            VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
+            constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
             node_keystore_files.teku_secrets_relative_dirpath,
         )
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
@@ -252,6 +260,23 @@ def get_beacon_config(
             el_context.ip_addr,
             el_context.engine_rpc_port_num,
         )
+
+    public_ports = {}
+    discovery_port = BEACON_DISCOVERY_PORT_NUM
+    if port_publisher.public_port_start:
+        discovery_port = port_publisher.cl_start
+        if bootnode_contexts and len(bootnode_contexts) > 0:
+            discovery_port = discovery_port + len(bootnode_contexts)
+        public_ports = {
+            BEACON_TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                discovery_port, shared_utils.TCP_PROTOCOL
+            ),
+            BEACON_UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                discovery_port, shared_utils.UDP_PROTOCOL
+            ),
+        }
+    used_ports = get_used_ports(discovery_port)
+
     cmd = [
         "--network={0}".format(
             network if network in constants.PUBLIC_NETWORKS else "custom"
@@ -259,15 +284,15 @@ def get_beacon_config(
         "--data-dir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--http-address=0.0.0.0",
         "--http-port={0}".format(BEACON_HTTP_PORT_NUM),
-        "--libp2p-port={0}".format(BEACON_DISCOVERY_PORT_NUM),
-        "--discovery-port={0}".format(BEACON_DISCOVERY_PORT_NUM),
+        "--libp2p-port={0}".format(discovery_port),
+        "--discovery-port={0}".format(discovery_port),
         "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--eth1-rpc-urls=" + EXECUTION_ENGINE_ENDPOINT,
         # vvvvvvvvvvvvvvvvvvv REMOVE THESE WHEN CONNECTING TO EXTERNAL NET vvvvvvvvvvvvvvvvvvvvv
         "--disable-enr-auto-update",
-        "--enr-address=" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        "--enr-udp-port={0}".format(BEACON_DISCOVERY_PORT_NUM),
-        "--enr-tcp-port={0}".format(BEACON_DISCOVERY_PORT_NUM),
+        "--enr-address=" + port_publisher.nat_exit_ip,
+        "--enr-udp-port={0}".format(discovery_port),
+        "--enr-tcp-port={0}".format(discovery_port),
         # ^^^^^^^^^^^^^^^^^^^ REMOVE THESE WHEN CONNECTING TO EXTERNAL NET ^^^^^^^^^^^^^^^^^^^^^
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
@@ -284,7 +309,29 @@ def get_beacon_config(
         "--enable-private-discovery",
     ]
 
-    keymanager_api_cmd = []
+    keymanager_api_cmd = [
+        "--enable-validator-api",
+        "--validator-api-address=0.0.0.0",
+        "--validator-api-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
+        "--validator-api-allowed-origins=*",
+        # "--validator-api-bearer-file=" + constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER, Not yet supported
+    ]
+
+    # If checkpoint sync is enabled, add the checkpoint sync url
+    if checkpoint_sync_enabled:
+        if checkpoint_sync_url:
+            cmd.append("--checkpoint-sync-url=" + checkpoint_sync_url)
+        else:
+            if network in ["mainnet", "ephemery"]:
+                cmd.append(
+                    "--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network]
+                )
+            else:
+                cmd.append(
+                    "--checkpoint-sync-url=https://checkpoint-sync.{0}.ethpandaops.io".format(
+                        network
+                    )
+                )
 
     if network not in constants.PUBLIC_NETWORKS:
         cmd.append(
@@ -307,9 +354,6 @@ def get_beacon_config(
                 )
         elif network == constants.NETWORK_NAME.ephemery:
             cmd.append(
-                "--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network]
-            )
-            cmd.append(
                 "--boot-nodes="
                 + shared_utils.get_devnet_enrs_list(
                     plan, el_cl_genesis_data.files_artifact_uuid
@@ -323,21 +367,12 @@ def get_beacon_config(
                 )
             )
         else:  # Devnets
-            # TODO Remove once checkpoint sync is working for verkle
-            if constants.NETWORK_NAME.verkle not in network:
-                cmd.append(
-                    "--checkpoint-sync-url=https://checkpoint-sync.{0}.ethpandaops.io".format(
-                        network
-                    )
-                )
             cmd.append(
                 "--boot-nodes="
                 + shared_utils.get_devnet_enrs_list(
                     plan, el_cl_genesis_data.files_artifact_uuid
                 )
             )
-    else:  # Public networks
-        cmd.append("--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network])
 
     if len(extra_params) > 0:
         # we do the list comprehension as the default extra_params is a proto repeated string
@@ -349,17 +384,16 @@ def get_beacon_config(
     }
 
     ports = {}
-    ports.update(BEACON_USED_PORTS)
+    ports.update(used_ports)
     if node_keystore_files != None and not use_separate_vc:
         cmd.extend(validator_default_cmd)
         files[
-            VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER
+            constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER
         ] = node_keystore_files.files_artifact_uuid
 
-        # Keymanager is still unimplemented in grandine
-        # if keymanager_enabled:
-        #     cmd.extend(keymanager_api_cmd)
-        #     ports.update(vc_shared.VALIDATOR_KEYMANAGER_USED_PORTS)
+        if keymanager_enabled:
+            cmd.extend(keymanager_api_cmd)
+            ports.update(vc_shared.VALIDATOR_KEYMANAGER_USED_PORTS)
 
     if persistent:
         files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
@@ -370,10 +404,11 @@ def get_beacon_config(
     return ServiceConfig(
         image=image,
         ports=ports,
+        public_ports=public_ports,
         cmd=cmd,
         env_vars=extra_env_vars,
         files=files,
-        private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ready_conditions=cl_node_ready_conditions.get_ready_conditions(
             BEACON_HTTP_PORT_ID
         ),
@@ -397,10 +432,10 @@ def get_beacon_config(
 def new_grandine_launcher(
     el_cl_genesis_data,
     jwt_file,
-    network,
+    network_params,
 ):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
-        network=network,
+        network=network_params.network,
     )

@@ -1,4 +1,7 @@
-mev_type: full
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+mev_type: flashbots
 additional_services:
   - tx_spammer
   - blob_spammer

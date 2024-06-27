@@ -20,7 +20,6 @@ def launch(
     el_cl_data,
     jwt_file,
     keymanager_file,
-    keymanager_p12_file,
     participants,
     all_el_contexts,
     global_log_level,
@@ -32,19 +31,22 @@ def launch(
     validator_data,
     prysm_password_relative_filepath,
     prysm_password_artifact_uuid,
+    checkpoint_sync_enabled,
+    checkpoint_sync_url,
+    port_publisher,
 ):
     plan.print("Launching CL network")
 
     cl_launchers = {
         constants.CL_TYPE.lighthouse: {
             "launcher": lighthouse.new_lighthouse_launcher(
-                el_cl_data, jwt_file, network_params.network
+                el_cl_data, jwt_file, network_params
             ),
             "launch_method": lighthouse.launch,
         },
         constants.CL_TYPE.lodestar: {
             "launcher": lodestar.new_lodestar_launcher(
-                el_cl_data, jwt_file, network_params.network
+                el_cl_data, jwt_file, network_params
             ),
             "launch_method": lodestar.launch,
         },
@@ -52,7 +54,7 @@ def launch(
             "launcher": nimbus.new_nimbus_launcher(
                 el_cl_data,
                 jwt_file,
-                network_params.network,
+                network_params,
                 keymanager_file,
             ),
             "launch_method": nimbus.launch,
@@ -61,7 +63,7 @@ def launch(
             "launcher": prysm.new_prysm_launcher(
                 el_cl_data,
                 jwt_file,
-                network_params.network,
+                network_params,
                 prysm_password_relative_filepath,
                 prysm_password_artifact_uuid,
             ),
@@ -71,9 +73,8 @@ def launch(
             "launcher": teku.new_teku_launcher(
                 el_cl_data,
                 jwt_file,
-                network_params.network,
+                network_params,
                 keymanager_file,
-                keymanager_p12_file,
             ),
             "launch_method": teku.launch,
         },
@@ -81,7 +82,7 @@ def launch(
             "launcher": grandine.new_grandine_launcher(
                 el_cl_data,
                 jwt_file,
-                network_params.network,
+                network_params,
             ),
             "launch_method": grandine.launch,
         },
@@ -107,7 +108,7 @@ def launch(
         if cl_type not in cl_launchers:
             fail(
                 "Unsupported launcher '{0}', need one of '{1}'".format(
-                    cl_type, ",".join([cl.name for cl in cl_launchers.keys()])
+                    cl_type, ",".join(cl_launchers.keys())
                 )
             )
 
@@ -120,7 +121,7 @@ def launch(
 
         cl_service_name = "cl-{0}-{1}-{2}".format(index_str, cl_type, el_type)
         new_cl_node_validator_keystores = None
-        if participant.validator_count != 0:
+        if participant.validator_count != 0 and participant.vc_count != 0:
             new_cl_node_validator_keystores = preregistered_validator_keys_for_nodes[
                 index
             ]
@@ -177,6 +178,9 @@ def launch(
                 node_selectors,
                 participant.use_separate_vc,
                 participant.keymanager_enabled,
+                checkpoint_sync_enabled,
+                checkpoint_sync_url,
+                port_publisher,
             )
         else:
             boot_cl_client_ctx = all_cl_contexts
@@ -210,6 +214,9 @@ def launch(
                 node_selectors,
                 participant.use_separate_vc,
                 participant.keymanager_enabled,
+                checkpoint_sync_enabled,
+                checkpoint_sync_url,
+                port_publisher,
             )
 
         # Add participant cl additional prometheus labels

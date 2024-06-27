@@ -1,5 +1,140 @@
 # Changelog
 
+## [4.0.0](https://github.com/ethpandaops/ethereum-package/compare/3.1.0...v4.0.0) (2024-06-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* migrate from kurtosis-tech to ethpandaops repository ([#663](https://github.com/ethpandaops/ethereum-package/issues/663))
+
+### Features
+
+* add names to run-sh ([#666](https://github.com/ethpandaops/ethereum-package/issues/666)) ([6b447b7](https://github.com/ethpandaops/ethereum-package/commit/6b447b7254ce1e9d7a2383eb1a0b9435bbabf237))
+* Adding arbitrary contract definition ([#646](https://github.com/ethpandaops/ethereum-package/issues/646)) ([cb58b65](https://github.com/ethpandaops/ethereum-package/commit/cb58b65911828b333c2aabf9052e30d79a8a55aa))
+* migrate from kurtosis-tech to ethpandaops repository ([#663](https://github.com/ethpandaops/ethereum-package/issues/663)) ([d980fee](https://github.com/ethpandaops/ethereum-package/commit/d980feedac0fbe6a18a6b699f62d3f3275657b16))
+* update Lodestar BN &lt;&gt; VC compatibility ([#664](https://github.com/ethpandaops/ethereum-package/issues/664)) ([7f365da](https://github.com/ethpandaops/ethereum-package/commit/7f365da6607bd863b12170ed475b77f4fafcc146))
+
+
+### Bug Fixes
+
+* permissions on autorelease ([#671](https://github.com/ethpandaops/ethereum-package/issues/671)) ([fcaa2c2](https://github.com/ethpandaops/ethereum-package/commit/fcaa2c23301c0f7012301fe019a75b0fa369961b))
+* update release please ([#670](https://github.com/ethpandaops/ethereum-package/issues/670)) ([fa53672](https://github.com/ethpandaops/ethereum-package/commit/fa536729886fa911ce4778b6d4097e2fb69a6c06))
+
+## [3.1.0](https://github.com/kurtosis-tech/ethereum-package/compare/3.0.0...3.1.0) (2024-06-07)
+
+
+### Features
+
+* add http url to el context ([#656](https://github.com/kurtosis-tech/ethereum-package/issues/656)) ([4e69a4c](https://github.com/kurtosis-tech/ethereum-package/commit/4e69a4c057c600d479879691837ba2ef7f683a34))
+* add prefunded accounts to output ([#657](https://github.com/kurtosis-tech/ethereum-package/issues/657)) ([bc06e2a](https://github.com/kurtosis-tech/ethereum-package/commit/bc06e2a4e93add97c75c5b520b87a6b9863a9faf))
+* add tracoor ([#651](https://github.com/kurtosis-tech/ethereum-package/issues/651)) ([b100cb6](https://github.com/kurtosis-tech/ethereum-package/commit/b100cb6fac5646783c0ee580ec3425fd74e0e4a1))
+* add vc_count to increase the number of validators per participant ([#633](https://github.com/kurtosis-tech/ethereum-package/issues/633)) ([4272ff3](https://github.com/kurtosis-tech/ethereum-package/commit/4272ff3e27be1c85fd5e8e606b956ea31c0ae3b9))
+* allow setting custom dora image & env variables ([#623](https://github.com/kurtosis-tech/ethereum-package/issues/623)) ([08a65c3](https://github.com/kurtosis-tech/ethereum-package/commit/08a65c33b645a1dc656feb0671513d9bf1b84c66))
+* **apache:** Serve all config files ([#606](https://github.com/kurtosis-tech/ethereum-package/issues/606)) ([3f1f5e1](https://github.com/kurtosis-tech/ethereum-package/commit/3f1f5e118e5d125ec108a40f0edc0b0617a60b5f))
+* **config:** add peerdas vars ([#619](https://github.com/kurtosis-tech/ethereum-package/issues/619)) ([22f1498](https://github.com/kurtosis-tech/ethereum-package/commit/22f1498a3d344150827a2393df3e3ff0c693a6ff))
+* expose network-params ([#659](https://github.com/kurtosis-tech/ethereum-package/issues/659)) ([b0820dd](https://github.com/kurtosis-tech/ethereum-package/commit/b0820ddae77e7d45d090c00e47aa3e8d3832e194))
+* forky ([#625](https://github.com/kurtosis-tech/ethereum-package/issues/625)) ([ded68bd](https://github.com/kurtosis-tech/ethereum-package/commit/ded68bdc73dbb0e166ef8e02dc3ab577066d0214))
+* Support participants_matrix ([#620](https://github.com/kurtosis-tech/ethereum-package/issues/620)) ([3a57467](https://github.com/kurtosis-tech/ethereum-package/commit/3a57467519ca20a519985ce2e2257c3694dc4fde))
+* use `peer-das` image for dora when eip7594 is active ([#593](https://github.com/kurtosis-tech/ethereum-package/issues/593)) ([1b4bd3d](https://github.com/kurtosis-tech/ethereum-package/commit/1b4bd3d1478839474a26d163312e99a810399b1b))
+
+
+### Bug Fixes
+
+* add additional prefund addresses ([#655](https://github.com/kurtosis-tech/ethereum-package/issues/655)) ([6d2cdb6](https://github.com/kurtosis-tech/ethereum-package/commit/6d2cdb6982da76f95bdde2b7930fbea9117016b8))
+* add cl log level to builders ([#638](https://github.com/kurtosis-tech/ethereum-package/issues/638)) ([ad46dbd](https://github.com/kurtosis-tech/ethereum-package/commit/ad46dbdf8babbc5bf6a5aae9ee9ee4be54491a92))
+* Add EIP-7002 & EIP-2935 bytecode to ethereum-genesis-generator ([#597](https://github.com/kurtosis-tech/ethereum-package/issues/597)) ([3d316ef](https://github.com/kurtosis-tech/ethereum-package/commit/3d316ef631b038355b88d23024d19086699bd452))
+* add http to teku endpoint ([#622](https://github.com/kurtosis-tech/ethereum-package/issues/622)) ([085b6e1](https://github.com/kurtosis-tech/ethereum-package/commit/085b6e126fc0ccf98431d74f56e9965fa8b1f665))
+* add peer_das_epoch to egg ([#603](https://github.com/kurtosis-tech/ethereum-package/issues/603)) ([91694df](https://github.com/kurtosis-tech/ethereum-package/commit/91694dfc1e8b64ac76b7dfda006f19db358941fa))
+* add sha256 as an image label (if present) ([#637](https://github.com/kurtosis-tech/ethereum-package/issues/637)) ([3dcf888](https://github.com/kurtosis-tech/ethereum-package/commit/3dcf888326266aaba38f8253e47b3dd85a457cd0))
+* add static port config for apache ([#608](https://github.com/kurtosis-tech/ethereum-package/issues/608)) ([b96e502](https://github.com/kurtosis-tech/ethereum-package/commit/b96e502145010694579d7b938a8112e0311ecb8b))
+* **apache:** only set static port if wanted ([#610](https://github.com/kurtosis-tech/ethereum-package/issues/610)) ([2c6b7b1](https://github.com/kurtosis-tech/ethereum-package/commit/2c6b7b1af7b7513adf46394b9138f726a57f9e38))
+* blockscout fix for json variant ([#662](https://github.com/kurtosis-tech/ethereum-package/issues/662)) ([e79c510](https://github.com/kurtosis-tech/ethereum-package/commit/e79c5101f44ca3a5bd70f16b2cf24976db8e555e))
+* churn adjustments ([#614](https://github.com/kurtosis-tech/ethereum-package/issues/614)) ([12ca872](https://github.com/kurtosis-tech/ethereum-package/commit/12ca8721b42e000bcf8b6624a0b3c7b6cbde57bd))
+* default config ([#632](https://github.com/kurtosis-tech/ethereum-package/issues/632)) ([14be117](https://github.com/kurtosis-tech/ethereum-package/commit/14be117598bca0d733cb8b1dc439abdde5be8ae1))
+* drop everythign after [@sha](https://github.com/sha) from image labels ([#636](https://github.com/kurtosis-tech/ethereum-package/issues/636)) ([5d35463](https://github.com/kurtosis-tech/ethereum-package/commit/5d35463853b6bb7e58112b5df246660c8d1bd02d))
+* erigon v3 - new default image ([#629](https://github.com/kurtosis-tech/ethereum-package/issues/629)) ([72cf150](https://github.com/kurtosis-tech/ethereum-package/commit/72cf150c580addc00c1ca0693b568d62b06118a1))
+* genesis generator bump ([#611](https://github.com/kurtosis-tech/ethereum-package/issues/611)) ([5460f6f](https://github.com/kurtosis-tech/ethereum-package/commit/5460f6fc26972fe576ef89d521d5251470e65b5e))
+* nightly tests ([#595](https://github.com/kurtosis-tech/ethereum-package/issues/595)) ([76c31e9](https://github.com/kurtosis-tech/ethereum-package/commit/76c31e91d830490c956321cc2f6b3301a8d6fd27))
+* pectra example ([#605](https://github.com/kurtosis-tech/ethereum-package/issues/605)) ([67e3da0](https://github.com/kurtosis-tech/ethereum-package/commit/67e3da0e0cf4314353d5cea806186530df54a1cd))
+* prysm vc key manager ports ([#639](https://github.com/kurtosis-tech/ethereum-package/issues/639)) ([81c1ee7](https://github.com/kurtosis-tech/ethereum-package/commit/81c1ee70a56f910ecd6b710dd0fe3721d81b6dcf))
+* re-add images to labels ([#634](https://github.com/kurtosis-tech/ethereum-package/issues/634)) ([71f6e28](https://github.com/kurtosis-tech/ethereum-package/commit/71f6e28e682e47a550ffef037c7b26ce836d96df))
+* README has invalid configs ([#631](https://github.com/kurtosis-tech/ethereum-package/issues/631)) ([e33b971](https://github.com/kurtosis-tech/ethereum-package/commit/e33b97171f1aedb647191e3b02835a8004cbaade))
+* readme indentation ([#600](https://github.com/kurtosis-tech/ethereum-package/issues/600)) ([583db1b](https://github.com/kurtosis-tech/ethereum-package/commit/583db1b4ebaa5ab2e5eb2f97aa7414f89376b022))
+* registration flags when using beacon node only ([#618](https://github.com/kurtosis-tech/ethereum-package/issues/618)) ([c12506b](https://github.com/kurtosis-tech/ethereum-package/commit/c12506b9587c9a87e89d2938351d72c4676160e1))
+* repair check workflow for external PRs ([#616](https://github.com/kurtosis-tech/ethereum-package/issues/616)) ([a584682](https://github.com/kurtosis-tech/ethereum-package/commit/a5846821563d318b993de48baab5e3a9c9e267d0))
+* seperate vc service names ([#654](https://github.com/kurtosis-tech/ethereum-package/issues/654)) ([a5ffe14](https://github.com/kurtosis-tech/ethereum-package/commit/a5ffe14e7d3c9f7ec6dbebd79a4b42c24394c0f7))
+* tune Besu options to work with tx_spammer ([#612](https://github.com/kurtosis-tech/ethereum-package/issues/612)) ([b395189](https://github.com/kurtosis-tech/ethereum-package/commit/b39518904fbf2cad5ca2ec18ce1bc18455207014))
+* update dora images ([#598](https://github.com/kurtosis-tech/ethereum-package/issues/598)) ([dd28d61](https://github.com/kurtosis-tech/ethereum-package/commit/dd28d61a31bdc4c58c33ca733487535041f5ae0a))
+* update prysm image ([#599](https://github.com/kurtosis-tech/ethereum-package/issues/599)) ([0a38114](https://github.com/kurtosis-tech/ethereum-package/commit/0a38114e8444837d7cff9aab9afe6b06e1c99d84))
+* use `electra-support` image for assertoor when electra fork epoch is set ([#607](https://github.com/kurtosis-tech/ethereum-package/issues/607)) ([cdeab93](https://github.com/kurtosis-tech/ethereum-package/commit/cdeab939eda037770b89b580658a87817aac1158))
+
+## [3.0.0](https://github.com/kurtosis-tech/ethereum-package/compare/2.2.0...3.0.0) (2024-05-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* add mev-rs relay/builder/boost ([#586](https://github.com/kurtosis-tech/ethereum-package/issues/586))
+* upcoming file path change in kurtosis upstream ([#582](https://github.com/kurtosis-tech/ethereum-package/issues/582))
+
+### Features
+
+* add apache file server ([#581](https://github.com/kurtosis-tech/ethereum-package/issues/581)) ([205256a](https://github.com/kurtosis-tech/ethereum-package/commit/205256a6d79303719973655b459e803d9b8e311f))
+* add enr/enode to apache ([#589](https://github.com/kurtosis-tech/ethereum-package/issues/589)) ([b789e17](https://github.com/kurtosis-tech/ethereum-package/commit/b789e1705f076ec6aa01ceffbf5fbeebb02d8c0f))
+* add execution client urls to dora config ([#588](https://github.com/kurtosis-tech/ethereum-package/issues/588)) ([2a20d5a](https://github.com/kurtosis-tech/ethereum-package/commit/2a20d5ad7d2bf8f9a9eb2b619681b438810176d2))
+* add mev-rs relay/builder/boost ([#586](https://github.com/kurtosis-tech/ethereum-package/issues/586)) ([525a8fb](https://github.com/kurtosis-tech/ethereum-package/commit/525a8fb3d794f8030a574f55f3a7e719c1b58dca))
+* Add peerdas support ([#591](https://github.com/kurtosis-tech/ethereum-package/issues/591)) ([14296ca](https://github.com/kurtosis-tech/ethereum-package/commit/14296cab11d8c7a9572cf57a37980e1d93285cad))
+* add snooper urls to assertoor config ([#571](https://github.com/kurtosis-tech/ethereum-package/issues/571)) ([87f383f](https://github.com/kurtosis-tech/ethereum-package/commit/87f383fbc7f9e28d383853fcb7cd491abe13a0cc))
+* allow setting exit ip address ([#584](https://github.com/kurtosis-tech/ethereum-package/issues/584)) ([aabc942](https://github.com/kurtosis-tech/ethereum-package/commit/aabc942c4e8534288f28cdbb1e9e55f2613f383c))
+
+
+### Bug Fixes
+
+* non-existent field access on error message ([#577](https://github.com/kurtosis-tech/ethereum-package/issues/577)) ([8515d27](https://github.com/kurtosis-tech/ethereum-package/commit/8515d276056a47f9e6a77dd498f823042bff1a8f))
+* participant redefining global flag ([#573](https://github.com/kurtosis-tech/ethereum-package/issues/573)) ([9139f4b](https://github.com/kurtosis-tech/ethereum-package/commit/9139f4b4c77bc43477740972512171d7f28bfa84))
+* path for shadowforks post kt update ([#585](https://github.com/kurtosis-tech/ethereum-package/issues/585)) ([e0622a7](https://github.com/kurtosis-tech/ethereum-package/commit/e0622a77305732e01ee0fce183fda15c3dcd2dad))
+* remove erigon's --chain parameter ([#575](https://github.com/kurtosis-tech/ethereum-package/issues/575)) ([02b9c50](https://github.com/kurtosis-tech/ethereum-package/commit/02b9c50495f9b8cce0b0df502f19b37c0cb21ffd))
+* upcoming file path change in kurtosis upstream ([#582](https://github.com/kurtosis-tech/ethereum-package/issues/582)) ([8d7c4f9](https://github.com/kurtosis-tech/ethereum-package/commit/8d7c4f9c1feba07511c22d006b5121b45893f642))
+
+## [2.2.0](https://github.com/kurtosis-tech/ethereum-package/compare/2.1.0...2.2.0) (2024-04-19)
+
+
+### Features
+
+* add assertoor test for per PR CI job ([#537](https://github.com/kurtosis-tech/ethereum-package/issues/537)) ([8ef5c57](https://github.com/kurtosis-tech/ethereum-package/commit/8ef5c57fc00b1e5ea9d59011fa61d771b1af5133))
+* add blutgang rpc load balancer ([#569](https://github.com/kurtosis-tech/ethereum-package/issues/569)) ([1be5f95](https://github.com/kurtosis-tech/ethereum-package/commit/1be5f9542cf43b7b5afc3f565358b50dfbb81d50))
+* add dugtrio beacon load balancer ([#568](https://github.com/kurtosis-tech/ethereum-package/issues/568)) ([56d2fa3](https://github.com/kurtosis-tech/ethereum-package/commit/56d2fa38e59018fa331c12a271a906ec4fe67e6e))
+* add new assertoor test to per ci jobs ([#545](https://github.com/kurtosis-tech/ethereum-package/issues/545)) ([3005d46](https://github.com/kurtosis-tech/ethereum-package/commit/3005d46d60970be18e66f6a7f590d0b4689e84f4))
+* use new rpc snooper from `ethpandaops/rpc-snooper` ([#567](https://github.com/kurtosis-tech/ethereum-package/issues/567)) ([5676f0d](https://github.com/kurtosis-tech/ethereum-package/commit/5676f0dd4d62ee25a7f8ca2959596e419743916d))
+
+
+### Bug Fixes
+
+* add --contract-deployment-block parameter for Prysm ([#557](https://github.com/kurtosis-tech/ethereum-package/issues/557)) ([d8dfbae](https://github.com/kurtosis-tech/ethereum-package/commit/d8dfbae531c038e3985cb15ca6bcbcf37f6526a0))
+* Added '--enable-private-discovery' to Grandine ([#541](https://github.com/kurtosis-tech/ethereum-package/issues/541)) ([a1ae708](https://github.com/kurtosis-tech/ethereum-package/commit/a1ae708183873dec97e91986d6104c8dedc92100))
+* beaconchain explorer ([#531](https://github.com/kurtosis-tech/ethereum-package/issues/531)) ([b62ed6f](https://github.com/kurtosis-tech/ethereum-package/commit/b62ed6f129c65b62f084ea2a78fab0fa80afd9e2))
+* beaconchain explorer ([#538](https://github.com/kurtosis-tech/ethereum-package/issues/538)) ([ce1f337](https://github.com/kurtosis-tech/ethereum-package/commit/ce1f3373000d552a9b4b8b09ad5754ab092a61cb))
+* blobber incorrect url ([#528](https://github.com/kurtosis-tech/ethereum-package/issues/528)) ([6f84e3d](https://github.com/kurtosis-tech/ethereum-package/commit/6f84e3d5ec5fd7c02016530b3b64c79114d5891e))
+* bump json rpc snooper ([#553](https://github.com/kurtosis-tech/ethereum-package/issues/553)) ([f69c4a7](https://github.com/kurtosis-tech/ethereum-package/commit/f69c4a7468f97a4aa3aaea64dd18a63e561a6704))
+* disable full sync if gcmode is archive ([#563](https://github.com/kurtosis-tech/ethereum-package/issues/563)) ([b7592ec](https://github.com/kurtosis-tech/ethereum-package/commit/b7592ecac5ca8820aa6de6fc5ae9bb9c0dc27c20))
+* disable pbss when gcmode archive set ([#559](https://github.com/kurtosis-tech/ethereum-package/issues/559)) ([e085462](https://github.com/kurtosis-tech/ethereum-package/commit/e0854624ef69a069bb7ba482694cb83180df0680))
+* disable pbss when gcmode archive set, force hash based init ([#562](https://github.com/kurtosis-tech/ethereum-package/issues/562)) ([3e1c7a6](https://github.com/kurtosis-tech/ethereum-package/commit/3e1c7a6585a50398e5750f6e37cf3d0685d35536))
+* disable static peers ([#529](https://github.com/kurtosis-tech/ethereum-package/issues/529)) ([c5d4028](https://github.com/kurtosis-tech/ethereum-package/commit/c5d4028939691b887b928b91532f8139478ee4d2))
+* enable single node mode on lodestar by default ([#558](https://github.com/kurtosis-tech/ethereum-package/issues/558)) ([555ad7d](https://github.com/kurtosis-tech/ethereum-package/commit/555ad7dc5180cc7f47e14baa3438879e6d4779e9))
+* fix doc string typo ([#560](https://github.com/kurtosis-tech/ethereum-package/issues/560)) ([13de3f6](https://github.com/kurtosis-tech/ethereum-package/commit/13de3f68706a80088b28fbfefc69d738e06d13ef))
+* fix failing persistence test ([#554](https://github.com/kurtosis-tech/ethereum-package/issues/554)) ([99242d6](https://github.com/kurtosis-tech/ethereum-package/commit/99242d66f3e0254684b75bce14353a854e735721))
+* increase mem limit of snooper ([#546](https://github.com/kurtosis-tech/ethereum-package/issues/546)) ([6ba5770](https://github.com/kurtosis-tech/ethereum-package/commit/6ba577006e6f6eb0b477619399edb232f4ed9783))
+* prysm beacon http url  ([#536](https://github.com/kurtosis-tech/ethereum-package/issues/536)) ([4914531](https://github.com/kurtosis-tech/ethereum-package/commit/4914531690eae32ba274e10ee7fa0ecf6d82ac68))
+* prysm beacon_http_url ([#535](https://github.com/kurtosis-tech/ethereum-package/issues/535)) ([ee7528c](https://github.com/kurtosis-tech/ethereum-package/commit/ee7528c5d5872768e7ddc25e9da963e764e3b594))
+* prysm vc ([#533](https://github.com/kurtosis-tech/ethereum-package/issues/533)) ([72ddeb2](https://github.com/kurtosis-tech/ethereum-package/commit/72ddeb25c1bb0a8132c1a3a73bd8f7764cb01659))
+* remove un-needed prysm vc check ([#542](https://github.com/kurtosis-tech/ethereum-package/issues/542)) ([f6326fe](https://github.com/kurtosis-tech/ethereum-package/commit/f6326fe2119648478ab1bfc90220cbd4b4e12cac))
+* set application protocol to be http for rpc ([#548](https://github.com/kurtosis-tech/ethereum-package/issues/548)) ([905de7c](https://github.com/kurtosis-tech/ethereum-package/commit/905de7c3635c3c057f67ae6589d708d9dc6d5ddd))
+* set the correct default vc image ([#544](https://github.com/kurtosis-tech/ethereum-package/issues/544)) ([953741d](https://github.com/kurtosis-tech/ethereum-package/commit/953741d824a4a76a1194c2643012bf738669c3ad))
+* uniformize keymanager ([#534](https://github.com/kurtosis-tech/ethereum-package/issues/534)) ([a6a2830](https://github.com/kurtosis-tech/ethereum-package/commit/a6a2830e90919999c6c391e9aa832094cf440d35))
+* update prometheus api ([#539](https://github.com/kurtosis-tech/ethereum-package/issues/539)) ([d2b9fb8](https://github.com/kurtosis-tech/ethereum-package/commit/d2b9fb8961eac8a712af36f49ac8a1f918dabb6b))
+* update vc &lt;&gt; cl matrix ([#564](https://github.com/kurtosis-tech/ethereum-package/issues/564)) ([0ffcf74](https://github.com/kurtosis-tech/ethereum-package/commit/0ffcf74cf3a83b0c462bc26d07254160b132b27a))
+* update vc compatibility matrix ([#543](https://github.com/kurtosis-tech/ethereum-package/issues/543)) ([58c4684](https://github.com/kurtosis-tech/ethereum-package/commit/58c4684594711ee58bf117c31d5cf688d476892e))
+* use `minimal-preset` images for dora & assertoor when minimal preset is used ([#532](https://github.com/kurtosis-tech/ethereum-package/issues/532)) ([ad7773e](https://github.com/kurtosis-tech/ethereum-package/commit/ad7773e86f1e1bb1f48b96e5126231fd060822e8))
+
 ## [2.1.0](https://github.com/kurtosis-tech/ethereum-package/compare/2.0.0...2.1.0) (2024-03-28)
 
 

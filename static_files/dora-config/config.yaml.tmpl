@@ -6,7 +6,7 @@ logging:
 chain:
   name: {{ .Network }}
 {{ if not .PublicNetwork }}
-  configPath: "/network-configs/network-configs/config.yaml"
+  configPath: "/network-configs/config.yaml"
 {{ end }}
   displayName: "{{ .Network }}"
 
@@ -45,6 +45,15 @@ beaconapi:
   redisCacheAddr: ""
   redisCachePrefix: ""
 
+executionapi:
+  endpoints:
+{{ range $elClient := .ELClientInfo }}
+    - url: "{{ $elClient.Execution_HTTP_URL }}"
+      name: "{{ $elClient.FullName }}"
+      archive: true
+{{- end }}
+  depositLogBatchSize: 1000
+
 # indexer keeps track of the latest epochs in memory.
 indexer:
   # max number of epochs to keep in memory
@@ -58,6 +67,16 @@ indexer:
 
   # number of seconds to wait between each epoch (don't overload CL client)
   syncEpochCooldown: 1
+
+mevIndexer:
+  # list of mev relays to crawl mev blocks from
+  relays: {{ if not .MEVRelayInfo }}[]{{ end }}
+{{ range $relay := .MEVRelayInfo }}
+    - index: {{ $relay.Index }}
+      name: "{{ $relay.Name }}"
+      url: "{{ $relay.Url }}"
+{{- end }}
+  refreshInterval: 5m
 
 database:
   engine: "sqlite"
