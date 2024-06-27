@@ -3,7 +3,7 @@ static_files = import_module("../static_files/static_files.star")
 
 SERVICE_NAME = "grafana"
 
-IMAGE_NAME = "grafana/grafana-enterprise:9.5.12"
+IMAGE_NAME = "grafana/grafana:latest-ubuntu"
 
 HTTP_PORT_ID = "http"
 HTTP_PORT_NUMBER_UINT16 = 3000
@@ -202,6 +202,8 @@ def merge_dashboards_artifacts(
         ] = additional_dashboard_data[GRANAFA_ADDITIONAL_DASHBOARDS_ARTIFACT_NAME_KEY]
 
     result = plan.run_sh(
+        name="merge-grafana-dashboards",
+        description="Merging grafana dashboards artifacts",
         run="find "
         + GRAFANA_ADDITIONAL_DASHBOARDS_FILEPATH_ON_SERVICE
         + " -type f -exec cp {} "

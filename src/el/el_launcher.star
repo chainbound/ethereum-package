@@ -23,6 +23,7 @@ def launch(
     persistent,
     network_id,
     num_participants,
+    port_publisher,
 ):
     el_launchers = {
         constants.EL_TYPE.geth: {
@@ -31,18 +32,16 @@ def launch(
                 jwt_file,
                 network_params.network,
                 network_id,
-                el_cl_data.cancun_time,
                 el_cl_data.prague_time,
             ),
             "launch_method": geth.launch,
         },
-        constants.EL_TYPE.gethbuilder: {
+        constants.EL_TYPE.geth_builder: {
             "launcher": geth.new_geth_launcher(
                 el_cl_data,
                 jwt_file,
                 network_params.network,
                 network_id,
-                el_cl_data.cancun_time,
                 el_cl_data.prague_time,
             ),
             "launch_method": geth.launch,
@@ -61,7 +60,7 @@ def launch(
                 jwt_file,
                 network_params.network,
                 network_id,
-                el_cl_data.cancun_time,
+                el_cl_data.prague_time,
             ),
             "launch_method": erigon.launch,
         },
@@ -78,6 +77,15 @@ def launch(
                 el_cl_data,
                 jwt_file,
                 network_params.network,
+            ),
+            "launch_method": reth.launch,
+        },
+        constants.EL_TYPE.reth_builder: {
+            "launcher": reth.new_reth_launcher(
+                el_cl_data,
+                jwt_file,
+                network_params.network,
+                builder=True,
             ),
             "launch_method": reth.launch,
         },
@@ -114,7 +122,7 @@ def launch(
         if el_type not in el_launchers:
             fail(
                 "Unsupported launcher '{0}', need one of '{1}'".format(
-                    el_type, ",".join([el.name for el in el_launchers.keys()])
+                    el_type, ",".join(el_launchers.keys())
                 )
             )
 
@@ -147,6 +155,7 @@ def launch(
             participant.el_volume_size,
             tolerations,
             node_selectors,
+            port_publisher,
         )
         # Add participant el additional prometheus metrics
         for metrics_info in el_context.el_metrics_info:

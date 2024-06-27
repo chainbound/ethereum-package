@@ -14,6 +14,7 @@ VERBOSITY_LEVELS = {
 
 def get_config(
     el_cl_genesis_data,
+    keymanager_file,
     image,
     participant_log_level,
     global_log_level,
@@ -32,18 +33,19 @@ def get_config(
     tolerations,
     node_selectors,
     keymanager_enabled,
+    preset,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
     )
 
     validator_keys_dirpath = shared_utils.path_join(
-        vc_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT,
+        constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
         node_keystore_files.raw_keys_relative_dirpath,
     )
 
     validator_secrets_dirpath = shared_utils.path_join(
-        vc_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT,
+        constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
         node_keystore_files.raw_secrets_relative_dirpath,
     )
 
@@ -72,6 +74,7 @@ def get_config(
         "--keymanager.port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
         "--keymanager.address=0.0.0.0",
         "--keymanager.cors=*",
+        "--keymanager.tokenFile=" + constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER,
     ]
 
     if len(extra_params) > 0:
@@ -80,15 +83,19 @@ def get_config(
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-        vc_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT: node_keystore_files.files_artifact_uuid,
+        constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER: node_keystore_files.files_artifact_uuid,
     }
 
     ports = {}
     ports.update(vc_shared.VALIDATOR_CLIENT_USED_PORTS)
 
     if keymanager_enabled:
+        files[constants.KEYMANAGER_MOUNT_PATH_ON_CLIENTS] = keymanager_file
         cmd.extend(keymanager_api_cmd)
         ports.update(vc_shared.VALIDATOR_KEYMANAGER_USED_PORTS)
+
+    if preset == "minimal":
+        extra_env_vars["LODESTAR_PRESET"] = "minimal"
 
     return ServiceConfig(
         image=image,
@@ -96,7 +103,6 @@ def get_config(
         cmd=cmd,
         env_vars=extra_env_vars,
         files=files,
-        private_ip_address_placeholder=vc_shared.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         min_cpu=vc_min_cpu,
         max_cpu=vc_max_cpu,
         min_memory=vc_min_mem,

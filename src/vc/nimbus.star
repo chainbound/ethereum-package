@@ -27,11 +27,11 @@ def get_config(
     validator_secrets_dirpath = ""
     if node_keystore_files != None:
         validator_keys_dirpath = shared_utils.path_join(
-            vc_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT,
+            constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
             node_keystore_files.nimbus_keys_relative_dirpath,
         )
         validator_secrets_dirpath = shared_utils.path_join(
-            vc_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT,
+            constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
             node_keystore_files.raw_secrets_relative_dirpath,
         )
 
@@ -60,7 +60,7 @@ def get_config(
         cmd.extend([param for param in extra_params])
 
     files = {
-        vc_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT: node_keystore_files.files_artifact_uuid,
+        constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER: node_keystore_files.files_artifact_uuid,
         constants.KEYMANAGER_MOUNT_PATH_ON_CLIENTS: keymanager_file,
     }
 
@@ -77,7 +77,6 @@ def get_config(
         cmd=cmd,
         env_vars=extra_env_vars,
         files=files,
-        private_ip_address_placeholder=vc_shared.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         min_cpu=vc_min_cpu,
         max_cpu=vc_max_cpu,
         min_memory=vc_min_mem,

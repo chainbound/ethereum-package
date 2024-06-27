@@ -28,27 +28,28 @@ ENGINE_RPC_PORT_ID = "engine-rpc"
 METRICS_PORT_ID = "metrics"
 
 
-PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
+def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
+    used_ports = {
+        WS_RPC_PORT_ID: shared_utils.new_port_spec(
+            WS_RPC_PORT_NUM,
+            shared_utils.TCP_PROTOCOL,
+            shared_utils.HTTP_APPLICATION_PROTOCOL,
+        ),
+        TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+            discovery_port, shared_utils.TCP_PROTOCOL
+        ),
+        UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+            discovery_port, shared_utils.UDP_PROTOCOL
+        ),
+        ENGINE_RPC_PORT_ID: shared_utils.new_port_spec(
+            ENGINE_RPC_PORT_NUM, shared_utils.TCP_PROTOCOL
+        ),
+        METRICS_PORT_ID: shared_utils.new_port_spec(
+            METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL
+        ),
+    }
+    return used_ports
 
-USED_PORTS = {
-    WS_RPC_PORT_ID: shared_utils.new_port_spec(
-        WS_RPC_PORT_NUM,
-        shared_utils.TCP_PROTOCOL,
-        shared_utils.HTTP_APPLICATION_PROTOCOL,
-    ),
-    TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-    UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        DISCOVERY_PORT_NUM, shared_utils.UDP_PROTOCOL
-    ),
-    ENGINE_RPC_PORT_ID: shared_utils.new_port_spec(
-        ENGINE_RPC_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-    METRICS_PORT_ID: shared_utils.new_port_spec(
-        METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-}
 
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
@@ -80,6 +81,7 @@ def launch(
     el_volume_size,
     tolerations,
     node_selectors,
+    port_publisher,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
@@ -126,11 +128,12 @@ def launch(
         extra_params,
         extra_env_vars,
         extra_labels,
-        launcher.cancun_time,
+        launcher.prague_time,
         persistent,
         el_volume_size,
         tolerations,
         node_selectors,
+        port_publisher,
     )
 
     service = plan.add_service(service_name, config)
@@ -144,6 +147,8 @@ def launch(
         service_name, METRICS_PATH, metrics_url
     )
 
+    http_url = "http://{0}:{1}".format(service.ip_address, WS_RPC_PORT_NUM)
+
     return el_context.new_el_context(
         "erigon",
         enr,
@@ -152,6 +157,7 @@ def launch(
         WS_RPC_PORT_NUM,
         WS_RPC_PORT_NUM,
         ENGINE_RPC_PORT_NUM,
+        http_url,
         service_name,
         [erigon_metrics_info],
     )
@@ -175,36 +181,48 @@ def get_config(
     extra_params,
     extra_env_vars,
     extra_labels,
-    cancun_time,
+    prague_time,
     persistent,
     el_volume_size,
     tolerations,
     node_selectors,
+    port_publisher,
 ):
     init_datadir_cmd_str = "erigon init --datadir={0} {1}".format(
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
     )
 
+    public_ports = {}
+    discovery_port = DISCOVERY_PORT_NUM
+    if port_publisher.public_port_start:
+        discovery_port = port_publisher.el_start + len(existing_el_clients)
+        public_ports = {
+            TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                discovery_port, shared_utils.TCP_PROTOCOL
+            ),
+            UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                discovery_port, shared_utils.UDP_PROTOCOL
+            ),
+        }
+    used_ports = get_used_ports(discovery_port)
+
     cmd = [
         "erigon",
-        "--chain={0}".format(
-            network if network in constants.PUBLIC_NETWORKS else "dev"
-        ),
         "{0}".format(
-            "--override.cancun=" + str(cancun_time)
+            "--override.prague=" + str(prague_time)
             if constants.NETWORK_NAME.shadowfork in network
             else ""
         ),
         "--networkid={0}".format(networkid),
         "--log.console.verbosity=" + verbosity_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        "--port={0}".format(DISCOVERY_PORT_NUM),
+        "--port={0}".format(discovery_port),
         "--http.api=eth,erigon,engine,web3,net,debug,trace,txpool,admin",
         "--http.vhosts=*",
         "--ws",
         "--allow-insecure-unlock",
-        "--nat=extip:" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "--nat=extip:" + port_publisher.nat_exit_ip,
         "--http",
         "--http.addr=0.0.0.0",
         "--http.corsdomain=*",
@@ -241,7 +259,10 @@ def get_config(
                     ]
                 )
             )
-    elif network not in constants.PUBLIC_NETWORKS:
+    elif (
+        network not in constants.PUBLIC_NETWORKS
+        and constants.NETWORK_NAME.shadowfork not in network
+    ):
         cmd.append(
             "--bootnodes="
             + shared_utils.get_devnet_enodes(
@@ -260,11 +281,12 @@ def get_config(
 
     return ServiceConfig(
         image=image,
-        ports=USED_PORTS,
+        ports=used_ports,
+        public_ports=public_ports,
         cmd=[command_arg_str],
         files=files,
         entrypoint=ENTRYPOINT_ARGS,
-        private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         min_cpu=el_min_cpu,
         max_cpu=el_max_cpu,
         min_memory=el_min_mem,
@@ -283,11 +305,11 @@ def get_config(
     )
 
 
-def new_erigon_launcher(el_cl_genesis_data, jwt_file, network, networkid, cancun_time):
+def new_erigon_launcher(el_cl_genesis_data, jwt_file, network, networkid, prague_time):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         network=network,
         networkid=networkid,
-        cancun_time=cancun_time,
+        prague_time=prague_time,
     )

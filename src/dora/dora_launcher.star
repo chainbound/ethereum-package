@@ -34,11 +34,15 @@ def launch_dora(
     participant_configs,
     el_cl_data_files_artifact_uuid,
     network_params,
+    dora_params,
     global_node_selectors,
+    mev_endpoints,
+    mev_endpoint_names,
 ):
     all_cl_client_info = []
+    all_el_client_info = []
     for index, participant in enumerate(participant_contexts):
-        full_name, cl_client, _, _ = shared_utils.get_client_names(
+        full_name, cl_client, el_client, _ = shared_utils.get_client_names(
             participant, index, participant_contexts, participant_configs
         )
         all_cl_client_info.append(
@@ -47,9 +51,32 @@ def launch_dora(
                 full_name,
             )
         )
+        all_el_client_info.append(
+            new_el_client_info(
+                "http://{0}:{1}".format(
+                    el_client.ip_addr,
+                    el_client.rpc_port_num,
+                ),
+                full_name,
+            )
+        )
+
+    mev_endpoint_info = []
+    for index, endpoint in enumerate(mev_endpoints):
+        mev_endpoint_info.append(
+            {
+                "Index": index,
+                "Name": mev_endpoint_names[index],
+                "Url": endpoint,
+            }
+        )
 
     template_data = new_config_template_data(
-        network_params.network, HTTP_PORT_NUMBER, all_cl_client_info
+        network_params.network,
+        HTTP_PORT_NUMBER,
+        all_cl_client_info,
+        all_el_client_info,
+        mev_endpoint_info,
     )
 
     template_and_data = shared_utils.new_template_and_data(
@@ -66,6 +93,7 @@ def launch_dora(
         config_files_artifact_name,
         el_cl_data_files_artifact_uuid,
         network_params,
+        dora_params,
         global_node_selectors,
     )
 
@@ -76,6 +104,7 @@ def get_config(
     config_files_artifact_name,
     el_cl_data_files_artifact_uuid,
     network_params,
+    dora_params,
     node_selectors,
 ):
     config_file_path = shared_utils.path_join(
@@ -83,8 +112,12 @@ def get_config(
         DORA_CONFIG_FILENAME,
     )
 
-    if network_params.preset == "minimal":
-        IMAGE_NAME = "ethpandaops/dora:minimal-preset"
+    if dora_params.image != "":
+        IMAGE_NAME = dora_params.image
+    elif network_params.eip7594_fork_epoch < 100000000:
+        IMAGE_NAME = "ethpandaops/dora:peer-das"
+    elif network_params.electra_fork_epoch < 100000000:
+        IMAGE_NAME = "ethpandaops/dora:electra-support"
     else:
         IMAGE_NAME = "ethpandaops/dora:latest"
 
@@ -97,6 +130,7 @@ def get_config(
             constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_data_files_artifact_uuid,
         },
         cmd=["-config", config_file_path],
+        env_vars=dora_params.env,
         min_cpu=MIN_CPU,
         max_cpu=MAX_CPU,
         min_memory=MIN_MEMORY,
@@ -105,11 +139,15 @@ def get_config(
     )
 
 
-def new_config_template_data(network, listen_port_num, cl_client_info):
+def new_config_template_data(
+    network, listen_port_num, cl_client_info, el_client_info, mev_endpoint_info
+):
     return {
         "Network": network,
         "ListenPortNum": listen_port_num,
         "CLClientInfo": cl_client_info,
+        "ELClientInfo": el_client_info,
+        "MEVRelayInfo": mev_endpoint_info,
         "PublicNetwork": True if network in constants.PUBLIC_NETWORKS else False,
     }
 
@@ -117,5 +155,12 @@ def new_config_template_data(network, listen_port_num, cl_client_info):
 def new_cl_client_info(beacon_http_url, full_name):
     return {
         "Beacon_HTTP_URL": beacon_http_url,
+        "FullName": full_name,
+    }
+
+
+def new_el_client_info(execution_http_url, full_name):
+    return {
+        "Execution_HTTP_URL": execution_http_url,
         "FullName": full_name,
     }

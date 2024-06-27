@@ -53,6 +53,7 @@ def new_port_spec(
 def read_file_from_service(plan, service_name, filename):
     output = plan.exec(
         service_name=service_name,
+        description="Reading {} from {}".format(filename, service_name),
         recipe=ExecRecipe(
             command=["/bin/sh", "-c", "cat {} | tr -d '\n'".format(filename)]
         ),
@@ -65,22 +66,35 @@ def zfill_custom(value, width):
 
 
 def label_maker(client, client_type, image, connected_client, extra_labels):
+    # Extract sha256 hash if present
+    sha256 = ""
+    if "@sha256:" in image:
+        sha256 = image.split("@sha256:")[-1][:8]
+
+    # Create the labels dictionary
     labels = {
         "ethereum-package.client": client,
         "ethereum-package.client-type": client_type,
-        "ethereum-package.client-image": image.replace("/", "-").replace(":", "-"),
+        "ethereum-package.client-image": image.replace("/", "-")
+        .replace(":", "_")
+        .split("@")[0],  # drop the sha256 part of the image from the label
+        "ethereum-package.sha256": sha256,
         "ethereum-package.connected-client": connected_client,
     }
-    labels.update(extra_labels)  # Add extra_labels to the labels dictionary
+
+    # Add extra_labels to the labels dictionary
+    labels.update(extra_labels)
+
     return labels
 
 
 def get_devnet_enodes(plan, filename):
     enode_list = plan.run_python(
+        description="Getting devnet enodes",
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
         run="""
-with open("/network-configs/network-configs/bootnode.txt") as bootnode_file:
+with open("/network-configs/enodes.txt") as bootnode_file:
     bootnodes = []
     for line in bootnode_file:
         line = line.strip()
@@ -93,10 +107,11 @@ print(",".join(bootnodes), end="")
 
 def get_devnet_enrs_list(plan, filename):
     enr_list = plan.run_python(
+        description="Creating devnet enrs list",
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
         run="""
-with open("/network-configs/network-configs/bootstrap_nodes.txt") as bootnode_file:
+with open("/network-configs/bootstrap_nodes.txt") as bootnode_file:
     bootnodes = []
     for line in bootnode_file:
         line = line.strip()
@@ -109,12 +124,13 @@ print(",".join(bootnodes), end="")
 
 def read_genesis_timestamp_from_config(plan, filename):
     value = plan.run_python(
+        description="Reading genesis timestamp from config",
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
         packages=["PyYAML"],
         run="""
 import yaml
-with open("/network-configs/network-configs/config.yaml", "r") as f:
+with open("/network-configs/config.yaml", "r") as f:
     yaml_data = yaml.safe_load(f)
 
 min_genesis_time = int(yaml_data.get("MIN_GENESIS_TIME", 0))
@@ -127,12 +143,13 @@ print(min_genesis_time + genesis_delay, end="")
 
 def read_genesis_network_id_from_config(plan, filename):
     value = plan.run_python(
+        description="Reading genesis network id from config",
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
         packages=["PyYAML"],
         run="""
 import yaml
-with open("/network-configs/network-configs/config.yaml", "r") as f:
+with open("/network-configs/config.yaml", "r") as f:
     yaml_data = yaml.safe_load(f)
 network_id = int(yaml_data.get("DEPOSIT_NETWORK_ID", 0))
 print(network_id, end="")
@@ -162,6 +179,7 @@ def get_network_name(network):
 # note that the timestamp it returns is a string
 def get_final_genesis_timestamp(plan, padding):
     result = plan.run_python(
+        description="Getting final genesis timestamp",
         run="""
 import time
 import sys
@@ -174,7 +192,7 @@ print(int(time.time()+padding), end="")
     return result.output
 
 
-def calculate_devnet_url(network):
+def calculate_devnet_url(network, repo):
     sf_suffix_mapping = {"hsf": "-hsf-", "gsf": "-gsf-", "ssf": "-ssf-"}
     shadowfork = "sf-" in network
 
@@ -193,8 +211,8 @@ def calculate_devnet_url(network):
         devnet_name.split("-")[1] + "-" if len(devnet_name.split("-")) > 1 else ""
     )
 
-    return "github.com/ethpandaops/{0}-devnets/network-configs/{1}{2}-{3}".format(
-        devnet_category, devnet_subname, network_type, devnet_number
+    return "github.com/{0}/{1}-devnets/network-configs/{2}{3}-{4}/metadata".format(
+        repo, devnet_category, devnet_subname, network_type, devnet_number
     )
 
 

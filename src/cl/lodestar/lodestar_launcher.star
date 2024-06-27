@@ -25,22 +25,24 @@ BEACON_MIN_MEMORY = 256
 
 METRICS_PATH = "/metrics"
 
-PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
-BEACON_USED_PORTS = {
-    TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-    UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        DISCOVERY_PORT_NUM, shared_utils.UDP_PROTOCOL
-    ),
-    BEACON_HTTP_PORT_ID: shared_utils.new_port_spec(
-        HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-    METRICS_PORT_ID: shared_utils.new_port_spec(
-        METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-}
+def get_used_ports(discovery_port):
+    beacon_used_ports = {
+        TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+            discovery_port, shared_utils.TCP_PROTOCOL
+        ),
+        UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+            discovery_port, shared_utils.UDP_PROTOCOL
+        ),
+        BEACON_HTTP_PORT_ID: shared_utils.new_port_spec(
+            HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL
+        ),
+        METRICS_PORT_ID: shared_utils.new_port_spec(
+            METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL
+        ),
+    }
+    return beacon_used_ports
+
 
 VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.error: "error",
@@ -79,8 +81,11 @@ def launch(
     participant_tolerations,
     global_tolerations,
     node_selectors,
-    use_separate_vc=True,
-    keymanager_enabled=False,
+    use_separate_vc,
+    keymanager_enabled,
+    checkpoint_sync_enabled,
+    checkpoint_sync_url,
+    port_publisher,
 ):
     beacon_service_name = "{0}".format(service_name)
     log_level = input_parser.get_client_log_level_or_default(
@@ -136,6 +141,10 @@ def launch(
         cl_volume_size,
         tolerations,
         node_selectors,
+        checkpoint_sync_enabled,
+        checkpoint_sync_url,
+        port_publisher,
+        launcher.preset,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -234,6 +243,10 @@ def get_beacon_config(
     cl_volume_size,
     tolerations,
     node_selectors,
+    checkpoint_sync_enabled,
+    checkpoint_sync_url,
+    port_publisher,
+    preset,
 ):
     el_client_rpc_url_str = "http://{0}:{1}".format(
         el_context.ip_addr,
@@ -252,11 +265,27 @@ def get_beacon_config(
             el_context.engine_rpc_port_num,
         )
 
+    public_ports = {}
+    discovery_port = DISCOVERY_PORT_NUM
+    if port_publisher.public_port_start:
+        discovery_port = port_publisher.cl_start
+        if bootnode_contexts and len(bootnode_contexts) > 0:
+            discovery_port = discovery_port + len(bootnode_contexts)
+        public_ports = {
+            TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                discovery_port, shared_utils.TCP_PROTOCOL
+            ),
+            UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                discovery_port, shared_utils.UDP_PROTOCOL
+            ),
+        }
+    used_ports = get_used_ports(discovery_port)
+
     cmd = [
         "beacon",
         "--logLevel=" + log_level,
-        "--port={0}".format(DISCOVERY_PORT_NUM),
-        "--discoveryPort={0}".format(DISCOVERY_PORT_NUM),
+        "--port={0}".format(discovery_port),
+        "--discoveryPort={0}".format(discovery_port),
         "--dataDir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--eth1.depositContractDeployBlock=0",
         "--network.connectToDiscv5Bootnodes=true",
@@ -269,9 +298,9 @@ def get_beacon_config(
         "--rest.namespace=*",
         "--rest.port={0}".format(HTTP_PORT_NUM),
         "--nat=true",
-        "--enr.ip=" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        "--enr.tcp={0}".format(DISCOVERY_PORT_NUM),
-        "--enr.udp={0}".format(DISCOVERY_PORT_NUM),
+        "--enr.ip=" + port_publisher.nat_exit_ip,
+        "--enr.tcp={0}".format(discovery_port),
+        "--enr.udp={0}".format(discovery_port),
         # Set per Pari's recommendation to reduce noise in the logs
         "--subscribeAllSubnets=true",
         "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
@@ -281,6 +310,22 @@ def get_beacon_config(
         "--metrics.port={0}".format(METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
     ]
+
+    # If checkpoint sync is enabled, add the checkpoint sync url
+    if checkpoint_sync_enabled:
+        if checkpoint_sync_url:
+            cmd.append("--checkpointSyncUrl=" + checkpoint_sync_url)
+        else:
+            if network in ["mainnet", "ephemery"]:
+                cmd.append(
+                    "--checkpointSyncUrl=" + constants.CHECKPOINT_SYNC_URL[network]
+                )
+            else:
+                cmd.append(
+                    "--checkpointSyncUrl=https://checkpoint-sync.{0}.ethpandaops.io".format(
+                        network
+                    )
+                )
 
     if network not in constants.PUBLIC_NETWORKS:
         cmd.append(
@@ -308,7 +353,6 @@ def get_beacon_config(
                     )
                 )
         elif network == constants.NETWORK_NAME.ephemery:
-            cmd.append("--checkpointSyncUrl=" + constants.CHECKPOINT_SYNC_URL[network])
             cmd.append(
                 "--bootnodes="
                 + shared_utils.get_devnet_enrs_list(
@@ -316,13 +360,6 @@ def get_beacon_config(
                 )
             )
         else:  # Devnets
-            # TODO Remove once checkpoint sync is working for verkle
-            if constants.NETWORK_NAME.verkle not in network:
-                cmd.append(
-                    "--checkpointSyncUrl=https://checkpoint-sync.{0}.ethpandaops.io".format(
-                        network
-                    )
-                )
             cmd.append(
                 "--bootnodes="
                 + shared_utils.get_devnet_enrs_list(
@@ -331,7 +368,6 @@ def get_beacon_config(
             )
     else:  # Public testnet
         cmd.append("--network=" + network)
-        cmd.append("--checkpointSyncUrl=" + constants.CHECKPOINT_SYNC_URL[network])
 
     if len(extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
@@ -346,13 +382,18 @@ def get_beacon_config(
             persistent_key="data-{0}".format(service_name),
             size=cl_volume_size,
         )
+
+    if preset == "minimal":
+        extra_env_vars["LODESTAR_PRESET"] = "minimal"
+
     return ServiceConfig(
         image=image,
-        ports=BEACON_USED_PORTS,
+        ports=used_ports,
+        public_ports=public_ports,
         cmd=cmd,
         env_vars=extra_env_vars,
         files=files,
-        private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ready_conditions=cl_node_ready_conditions.get_ready_conditions(
             BEACON_HTTP_PORT_ID
         ),
@@ -372,9 +413,10 @@ def get_beacon_config(
     )
 
 
-def new_lodestar_launcher(el_cl_genesis_data, jwt_file, network):
+def new_lodestar_launcher(el_cl_genesis_data, jwt_file, network_params):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
-        network=network,
+        network=network_params.network,
+        preset=network_params.preset,
     )

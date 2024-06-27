@@ -36,29 +36,31 @@ METRICS_PATH = "/debug/metrics/prometheus"
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/geth/execution-data"
 
-PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
-USED_PORTS = {
-    RPC_PORT_ID: shared_utils.new_port_spec(
-        RPC_PORT_NUM,
-        shared_utils.TCP_PROTOCOL,
-        shared_utils.HTTP_APPLICATION_PROTOCOL,
-    ),
-    WS_PORT_ID: shared_utils.new_port_spec(WS_PORT_NUM, shared_utils.TCP_PROTOCOL),
-    TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-    UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        DISCOVERY_PORT_NUM, shared_utils.UDP_PROTOCOL
-    ),
-    ENGINE_RPC_PORT_ID: shared_utils.new_port_spec(
-        ENGINE_RPC_PORT_NUM,
-        shared_utils.TCP_PROTOCOL,
-    ),
-    METRICS_PORT_ID: shared_utils.new_port_spec(
-        METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-}
+def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
+    used_ports = {
+        RPC_PORT_ID: shared_utils.new_port_spec(
+            RPC_PORT_NUM,
+            shared_utils.TCP_PROTOCOL,
+            shared_utils.HTTP_APPLICATION_PROTOCOL,
+        ),
+        WS_PORT_ID: shared_utils.new_port_spec(WS_PORT_NUM, shared_utils.TCP_PROTOCOL),
+        TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+            discovery_port, shared_utils.TCP_PROTOCOL
+        ),
+        UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+            discovery_port, shared_utils.UDP_PROTOCOL
+        ),
+        ENGINE_RPC_PORT_ID: shared_utils.new_port_spec(
+            ENGINE_RPC_PORT_NUM,
+            shared_utils.TCP_PROTOCOL,
+        ),
+        METRICS_PORT_ID: shared_utils.new_port_spec(
+            METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL
+        ),
+    }
+    return used_ports
+
 
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
@@ -94,6 +96,7 @@ def launch(
     el_volume_size,
     tolerations,
     node_selectors,
+    port_publisher,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
@@ -140,12 +143,12 @@ def launch(
         extra_params,
         extra_env_vars,
         extra_labels,
-        launcher.cancun_time,
         launcher.prague_time,
         persistent,
         el_volume_size,
         tolerations,
         node_selectors,
+        port_publisher,
     )
 
     service = plan.add_service(service_name, config)
@@ -159,6 +162,8 @@ def launch(
         service_name, METRICS_PATH, metrics_url
     )
 
+    http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
+
     return el_context.new_el_context(
         "geth",
         enr,
@@ -167,6 +172,7 @@ def launch(
         RPC_PORT_NUM,
         WS_PORT_NUM,
         ENGINE_RPC_PORT_NUM,
+        http_url,
         service_name,
         [geth_metrics_info],
     )
@@ -190,13 +196,17 @@ def get_config(
     extra_params,
     extra_env_vars,
     extra_labels,
-    cancun_time,
     prague_time,
     persistent,
     el_volume_size,
     tolerations,
     node_selectors,
+    port_publisher,
 ):
+    if "--gcmode=archive" in extra_params or "--gcmode archive" in extra_params:
+        gcmode_archive = True
+    else:
+        gcmode_archive = False
     # TODO: Remove this once electra fork has path based storage scheme implemented
     if (
         constants.NETWORK_NAME.verkle in network
@@ -214,44 +224,45 @@ def get_config(
                     constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
                 )
             )
-    elif constants.NETWORK_NAME.shadowfork in network:
+    elif constants.NETWORK_NAME.shadowfork in network:  # shadowfork
         init_datadir_cmd_str = "echo shadowfork"
 
-    elif (
-        "--gcmode archive" in extra_params
-    ):  # Disable path based storage scheme archive mode
-        init_datadir_cmd_str = "geth init --datadir={0} {1}".format(
+    elif gcmode_archive:  # Disable path based storage scheme archive mode
+        init_datadir_cmd_str = "geth init --state.scheme=hash --datadir={0} {1}".format(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
             constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
         )
     else:
-        init_datadir_cmd_str = "geth init --state.scheme=path --datadir={0} {1}".format(
+        init_datadir_cmd_str = "geth init --datadir={0} {1}".format(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
             constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
         )
+
+    public_ports = {}
+    discovery_port = DISCOVERY_PORT_NUM
+    if port_publisher.public_port_start:
+        discovery_port = port_publisher.el_start + len(existing_el_clients)
+        public_ports = {
+            TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                discovery_port, shared_utils.TCP_PROTOCOL
+            ),
+            UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                discovery_port, shared_utils.UDP_PROTOCOL
+            ),
+        }
+    used_ports = get_used_ports(discovery_port)
 
     cmd = [
         "geth",
         # Disable path based storage scheme for electra fork and verkle
         # TODO: REMOVE Once geth default db is path based, and builder rebased
         "{0}".format(
-            "--state.scheme=path"
-            if "verkle" not in network and "--gcmode archive" not in extra_params
-            else ""
+            "--state.scheme=hash" if "verkle" in network or gcmode_archive else ""
         ),
         # Override prague fork timestamp for electra fork
         "{0}".format("--cache.preimages" if "verkle" in network else ""),
-        # Override prague fork timestamp
-        "{0}".format(
-            "--override.prague=" + str(prague_time) if "verkle-gen" in network else ""
-        ),
         "{0}".format(
             "--{}".format(network) if network in constants.PUBLIC_NETWORKS else ""
-        ),
-        "{0}".format(
-            "--override.cancun=" + str(cancun_time)
-            if constants.NETWORK_NAME.shadowfork in network
-            else ""
         ),
         "--networkid={0}".format(networkid),
         "--verbosity=" + verbosity_level,
@@ -269,17 +280,19 @@ def get_config(
         "--ws.api=admin,engine,net,eth,web3,debug",
         "--ws.origins=*",
         "--allow-insecure-unlock",
-        "--nat=extip:" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "--nat=extip:" + port_publisher.nat_exit_ip,
         "--verbosity=" + verbosity_level,
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.addr=0.0.0.0",
         "--authrpc.vhosts=*",
         "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--syncmode=full",
+        "--syncmode=full" if not gcmode_archive else "--gcmode=archive",
         "--rpc.allow-unprotected-txs",
         "--metrics",
         "--metrics.addr=0.0.0.0",
         "--metrics.port={0}".format(METRICS_PORT_NUM),
+        "--discovery.port={0}".format(discovery_port),
+        "--port={0}".format(discovery_port),
     ]
 
     if BUILDER_IMAGE_STR in image:
@@ -310,14 +323,17 @@ def get_config(
                     ]
                 )
             )
-        if (
-            constants.NETWORK_NAME.shadowfork in network and "verkle" in network
-        ):  # verkle shadowfork
+        if constants.NETWORK_NAME.shadowfork in network:  # shadowfork
             cmd.append("--override.prague=" + str(prague_time))
-            cmd.append("--override.overlay-stride=10000")
-            cmd.append("--override.blockproof=true")
-            cmd.append("--clear.verkle.costs=true")
-    elif network not in constants.PUBLIC_NETWORKS:
+            if "verkle" in network:  # verkle-shadowfork
+                cmd.append("--override.overlay-stride=10000")
+                cmd.append("--override.blockproof=true")
+                cmd.append("--clear.verkle.costs=true")
+
+    elif (
+        network not in constants.PUBLIC_NETWORKS
+        and constants.NETWORK_NAME.shadowfork not in network
+    ):
         cmd.append(
             "--bootnodes="
             + shared_utils.get_devnet_enodes(
@@ -350,11 +366,12 @@ def get_config(
         )
     return ServiceConfig(
         image=image,
-        ports=USED_PORTS,
+        ports=used_ports,
+        public_ports=public_ports,
         cmd=[command_str],
         files=files,
         entrypoint=ENTRYPOINT_ARGS,
-        private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         min_cpu=el_min_cpu,
         max_cpu=el_max_cpu,
         min_memory=el_min_mem,
@@ -377,7 +394,6 @@ def new_geth_launcher(
     jwt_file,
     network,
     networkid,
-    cancun_time,
     prague_time,
 ):
     return struct(
@@ -385,6 +401,5 @@ def new_geth_launcher(
         jwt_file=jwt_file,
         network=network,
         networkid=networkid,
-        cancun_time=cancun_time,
         prague_time=prague_time,
     )
