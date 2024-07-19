@@ -666,7 +666,7 @@ def default_participant():
         "el_max_cpu": 0,
         "el_min_mem": 0,
         "el_max_mem": 0,
-        "cl_type": "lighthouse",
+        "cl_type": "prysm",
         "cl_image": "",
         "cl_log_level": "",
         "cl_extra_env_vars": {},
@@ -712,7 +712,7 @@ def get_default_mev_params():
     return {
         "mev_relay_image": MEV_BOOST_RELAY_DEFAULT_IMAGE,
         "mev_builder_image": "flashbots/builder:latest",
-        "mev_builder_cl_image": "sigp/lighthouse:latest",
+        "mev_builder_cl_image": "gcr.io/prysmaticlabs/prysm/beacon-chain:stable",
         "mev_boost_image": "flashbots/mev-boost",
         "mev_boost_args": ["mev-boost", "--relay-check"],
         "mev_relay_api_extra_args": [],
