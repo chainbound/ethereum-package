@@ -11,6 +11,15 @@ redis:
 simulator:
   url: {{ .BlockSimulatorConfig.url }}
 
+builders:
+  {{ range $builderConfig := .BuildersConfig }}
+    - pub_key: "{{ $builderConfig.pub_key }}"
+      builder_info:
+        collateral: "{{ $builderConfig.builder_info.collateral }}"
+        is_optimistic: {{ $builderConfig.builder_info.is_optimistic }}
+        builder_id: "{{ $builderConfig.builder_info.builder_id }}"
+  {{- end }}
+
 beacon_clients:
   {{ range $bcConfig := .BeaconClientsConfig }}
     - url: "{{ $bcConfig.url }}"

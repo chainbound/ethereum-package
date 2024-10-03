@@ -98,6 +98,18 @@ def launch_helix_relay(
         HELIX_CONFIG_MOUNT_DIRPATH_ON_SERVICE, HELIX_NETWORK_CONFIG_FILENAME
     )
 
+    # TODO: fetch builder pub_key from the builder service
+    hardcoded_builders = [
+        {
+            "pub_key": "0xaa1488eae4b06a1fff840a2b6db167afc520758dc2c8af0dfb57037954df3431b747e2f900fe8805f05d635e9a29717b",
+            "builder_info": {
+                "collateral": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                "is_optimistic": False,
+                "builder_id": "Bolt Builder",
+            }
+        }
+    ]
+
     # See https://github.com/kurtosis-tech/postgres-package#use-this-package-in-your-package
     # and https://docs.kurtosis.com/api-reference/starlark-reference/service/
     helix_config_template_data = new_config_template_data(
@@ -108,6 +120,7 @@ def launch_helix_relay(
         postgres.password,
         redis.url,
         builder_uri,
+        hardcoded_builders,
         beacon_uris,
         network_config_dir_path_on_service,
         validator_root,
@@ -174,6 +187,7 @@ def new_config_template_data(
     postgres_password,
     redis_url,
     blocksim_url,
+    builders_allowed,
     beacon_uris,
     network_config_dir_path,
     genesis_validator_root,
@@ -201,4 +215,14 @@ def new_config_template_data(
             "genesis_validator_root": genesis_validator_root,
             "genesis_time": genesis_time,
         },
+        "BuildersConfig": [
+            {
+                "pub_key": builder["pub_key"],
+                "builder_info": {
+                    "collateral": builder["builder_info"]["collateral"],
+                    "is_optimistic": builder["builder_info"]["is_optimistic"],
+                    "builder_id": builder["builder_info"]["builder_id"],
+                }
+            } for builder in builders_allowed
+        ]
     }
