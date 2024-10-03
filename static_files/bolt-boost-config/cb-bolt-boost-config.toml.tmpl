@@ -2,7 +2,10 @@
 # Some fields are optional and can be omitted, in which case the default value, if present, will be used.
 
 # Chain spec id. Supported values: Mainnet, Holesky, Helder
-chain = "{{ or .chain "Mainnet" }}"
+[chain.Custom]
+genesis_time_secs = 1627501200  # Example value for genesis time in seconds
+slot_time_secs = 12             # Example value for slot time in seconds
+genesis_fork_version = [0, 0, 0, 1]  # Example fork version as an array of 4 bytes
 
 # Configuration for the PBS module
 [pbs]

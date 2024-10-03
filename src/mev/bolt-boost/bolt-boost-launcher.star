@@ -37,6 +37,7 @@ def launch(
         bolt_boost_image,
         relays_config,
         bolt_sidecar_config,
+        network_params,
         global_node_selectors,
     )
 
@@ -52,6 +53,7 @@ def get_bolt_boost_config(
     image,
     relays_config,
     bolt_sidecar_config,
+    network_params,
     node_selectors,
 ):
     # Read the template file for Bolt Boost configuration
@@ -61,7 +63,7 @@ def get_bolt_boost_config(
 
     # Generate the data to be used in the Bolt Boost configuration,
     # wrap them together in a struct
-    bolt_boost_config_template_data = new_bolt_boost_config_template_data(image, relays_config, bolt_sidecar_config)
+    bolt_boost_config_template_data = new_bolt_boost_config_template_data(image, relays_config, bolt_sidecar_config, network_params)
     bolt_boost_config_template_and_data = shared_utils.new_template_and_data(
         bolt_boost_config_template, bolt_boost_config_template_data
     )
@@ -94,7 +96,13 @@ def get_bolt_boost_config(
         node_selectors=node_selectors,
     )
 
-def new_bolt_boost_config_template_data(image, relays_config, bolt_sidecar_config):
+def new_bolt_boost_config_template_data(image, relays_config, bolt_sidecar_config, network_params):
+    # chain = None
+    # if network_params.network.lower() == "kurtosis":
+    #     chain = "Kurtosis {"
+    # else:
+    #     chain = network_params.network.capitalize()
+
     return {
         "chain": "Holesky",
         "image": image,
