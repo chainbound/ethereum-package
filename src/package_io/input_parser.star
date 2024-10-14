@@ -43,6 +43,8 @@ HIGH_DENEB_VALUE_FORK_VERKLE = 2000000000
 # MEV Params
 FLASHBOTS_MEV_BOOST_PORT = 18550
 MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost"
+BOLT_BOOST_SERVICE_NAME_PREFIX = "bolt-boost"
+BOLT_SIDECAR_SERVICE_NAME_PREFIX = "bolt-sidecar"
 
 # Minimum number of validators required for a network to be valid is 64
 MIN_VALIDATORS = 64
@@ -140,12 +142,20 @@ def input_parser(plan, input_args):
         result = enrich_disable_peer_scoring(result)
 
     if result.get("mev_type") in ("mock", "full"):
-        result = enrich_mev_extra_params(
-            result,
-            MEV_BOOST_SERVICE_NAME_PREFIX,
-            FLASHBOTS_MEV_BOOST_PORT,
-            result.get("mev_type"),
-        )
+        if result.get("mev_params")["bolt_boost_image"] != None:
+            result = enrich_mev_extra_params(
+                result,
+                BOLT_BOOST_SERVICE_NAME_PREFIX,
+                FLASHBOTS_MEV_BOOST_PORT,
+                result.get("mev_type"),
+            )
+        else:
+            result = enrich_mev_extra_params(
+                result,
+                MEV_BOOST_SERVICE_NAME_PREFIX,
+                FLASHBOTS_MEV_BOOST_PORT,
+                result.get("mev_type"),
+            )
 
     return struct(
         participants=[
@@ -236,11 +246,13 @@ def input_parser(plan, input_args):
             preset=result["network_params"]["preset"],
         ),
         mev_params=struct(
+            bolt_boost_image=result["mev_params"]["bolt_boost_image"],
+            helix_relay_image=result["mev_params"]["helix_relay_image"],
             mev_relay_image=result["mev_params"]["mev_relay_image"],
             mev_builder_image=result["mev_params"]["mev_builder_image"],
             mev_builder_cl_image=result["mev_params"]["mev_builder_cl_image"],
             mev_boost_image=result["mev_params"]["mev_boost_image"],
-            mev_sidecar_image=result["mev_params"]["mev_sidecar_image"],
+            bolt_sidecar_image=result["mev_params"]["bolt_sidecar_image"],
             mev_boost_args=result["mev_params"]["mev_boost_args"],
             mev_relay_api_extra_args=result["mev_params"]["mev_relay_api_extra_args"],
             mev_relay_housekeeper_extra_args=result["mev_params"][
@@ -709,6 +721,7 @@ def default_participant():
 
 def get_default_mev_params():
     return {
+        "bolt_boost_image": None,
         "mev_relay_image": MEV_BOOST_RELAY_DEFAULT_IMAGE,
         "mev_builder_image": "flashbots/builder:latest",
         "mev_builder_cl_image": "sigp/lighthouse:latest",
@@ -794,8 +807,9 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
         index_str = shared_utils.zfill_custom(
             index + 1, len(str(len(parsed_arguments_dict["participants"])))
         )
+
         mev_url = "http://{0}-{1}-{2}-{3}:{4}".format(
-            MEV_BOOST_SERVICE_NAME_PREFIX,
+            mev_prefix,
             index_str,
             participant["cl_type"],
             participant["el_type"],
@@ -850,8 +864,8 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                 # TODO(maybe) make parts of this more passable like the mev-relay-endpoint & forks
                 "el_extra_params": [
                     "--builder",
-                    "--builder.remote_relay_endpoint=http://mev-relay-api:9062",
-                    "--builder.mev_sidecar_endpoint=http://mev-sidecar-api:9061",
+                    # TODO: (thedevbirb) this should indeed more passable. Now hardcoded for Helix relay
+                    "--builder.remote_relay_endpoint=http://helix-relay:4040",
                     "--builder.beacon_endpoints=http://cl-{0}-lighthouse-geth-builder:4000".format(
                         index_str
                     ),
