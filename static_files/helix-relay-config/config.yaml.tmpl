@@ -1,0 +1,23 @@
+postgres:
+  hostname: {{ .PostgresConfig.hostname }}
+  port: {{ .PostgresConfig.port }}
+  db_name: {{ .PostgresConfig.db_name }}
+  user: {{ .PostgresConfig.user }}
+  password: {{ .PostgresConfig.password }}
+
+redis:
+  url: {{ .RedisConfig.url }}
+
+simulator:
+  url: {{ .BlockSimulatorConfig.url }}
+
+beacon_clients:
+  {{ range $bcConfig := .BeaconClientsConfig }}
+    - url: "{{ $bcConfig.url }}"
+  {{- end }}
+
+network_config:
+  !Custom # this is a custom enum type and requies a '!'
+    dir_path: {{ .NetworkConfig.dir_path }}
+    genesis_validator_root: {{ .NetworkConfig.genesis_validator_root }}
+    genesis_time: {{ .NetworkConfig.genesis_time }}
