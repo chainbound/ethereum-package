@@ -152,10 +152,10 @@ def launch_helix_relay(
             ports={
                 "api": PortSpec(
                     number=HELIX_RELAY_ENDPOINT_PORT, transport_protocol="TCP"
+                ),
+                "website": PortSpec(
+                    number=HELIX_RELAY_WEBSITE_PORT, transport_protocol="TCP"
                 )
-                # "website": PortSpec(
-                #     number=HELIX_RELAY_WEBSITE_PORT, transport_protocol="TCP"
-                # )
             },
             env_vars=env_vars,
             min_cpu=RELAY_MIN_CPU,
