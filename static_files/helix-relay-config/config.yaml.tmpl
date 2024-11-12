@@ -1,0 +1,51 @@
+postgres:
+  hostname: {{ .postgres.hostname }}
+  port: {{ .postgres.port }}
+  db_name: {{ .postgres.db_name }}
+  user: {{ .postgres.user }}
+  password: {{ .postgres.password }}
+  region: 0
+  region_name: "bolt"
+
+redis:
+  url: {{ .redis.url }}
+
+simulator:
+  url: {{ .simulator.url }}
+
+beacon_clients:
+  {{ range $bcConfig := .beacon_clients }}
+    - url: "{{ $bcConfig.url }}"
+  {{- end }}
+
+builders:
+  # Reference: https://github.com/chainbound/bolt-builder/blob/main/cmd/utils/flags.go#L691-L691
+  - pub_key: "aa1488eae4b06a1fff840a2b6db167afc520758dc2c8af0dfb57037954df3431b747e2f900fe8805f05d635e9a29717b"
+    builder_info:
+      collateral: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+      is_optimistic: false
+      builder_id: "Bolt Builder"
+
+{{- if .constraints_api_config }}
+constraints_api_config:
+  check_constraints_signature: {{ .constraints_api_config.check_constraints_signature }}
+  max_block_value_to_verify_wei: {{ .constraints_api_config.max_block_value_to_verify_wei }}
+{{- end }}
+
+network_config:
+  !Custom # this is a custom enum type and requies a '!'
+    dir_path: {{ .network_config.dir_path }}
+    genesis_validator_root: {{ .network_config.genesis_validator_root }}
+    genesis_time: {{ .network_config.genesis_time }}
+
+# If empty, all routes are enabled
+router_config:
+  enabled_routes: []
+
+website:
+  enabled: true
+  port: 8080
+  listen_address: "0.0.0.0"
+  network_name: "kurtosis"
+  relay_url: http://0xa55c1285d84ba83a5ad26420cd5ad3091e49c55a813eee651cd467db38a8c8e63192f47955e9376f6b42f6d190571cb5@helix-relay:4040
+  relay_pubkey: 0xa55c1285d84ba83a5ad26420cd5ad3091e49c55a813eee651cd467db38a8c8e63192f47955e9376f6b42f6d190571cb5

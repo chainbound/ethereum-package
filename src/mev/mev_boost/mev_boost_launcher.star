@@ -30,16 +30,18 @@ def launch(
     network_id,
     mev_boost_image,
     mev_boost_args,
-    global_node_selectors,
     network_params,
+    final_genesis_timestamp,
+    global_node_selectors,
 ):
     config = get_config(
         mev_boost_launcher,
         network_id,
         mev_boost_image,
         mev_boost_args,
-        global_node_selectors,
         network_params,
+        final_genesis_timestamp,
+        global_node_selectors,
     )
 
     mev_boost_service = plan.add_service(service_name, config)
@@ -54,8 +56,9 @@ def get_config(
     network_id,
     mev_boost_image,
     mev_boost_args,
-    node_selectors,
     network_params,
+    final_genesis_timestamp,
+    node_selectors,
 ):
     command = mev_boost_args
 
@@ -64,10 +67,7 @@ def get_config(
         ports=USED_PORTS,
         cmd=command,
         env_vars={
-            # TODO(maybe) remove the hardcoding
-            # This is set to match this file https://github.com/kurtosis-tech/ethereum-package/blob/main/static_files/genesis-generation-config/cl/config.yaml.tmpl#L11
-            # latest-notes
-            # does this need genesis time to be set as well
+            "GENESIS_TIMESTAMP": str(final_genesis_timestamp),
             "GENESIS_FORK_VERSION": "0x10000038",
             "BOOST_LISTEN_ADDR": "0.0.0.0:{0}".format(
                 input_parser.FLASHBOTS_MEV_BOOST_PORT

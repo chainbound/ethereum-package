@@ -11,6 +11,7 @@ PRYSM_PASSWORD_FILEPATH_ON_GENERATOR = "/tmp/prysm-password.txt"
 KEYSTORES_GENERATION_TOOL_NAME = "/app/eth2-val-tools"
 
 ETH_VAL_TOOLS_IMAGE = "protolambda/eth2-val-tools:latest"
+# ETH_VAL_TOOLS_IMAGE = "ghcr.io/chainbound/eth2-val-tools:0.1.0"
 
 SUCCESSFUL_EXEC_CMD_EXIT_CODE = 0
 
@@ -94,6 +95,7 @@ def generate_validator_keystores(plan, mnemonic, participants):
         running_total_validator_count += participant.validator_count
         stop_index = start_index + participant.validator_count
 
+        # NOTE: removed --insecure flag.
         generate_keystores_cmd = '{0} keystores --insecure --prysm-pass {1} --out-loc {2} --source-mnemonic "{3}" --source-min {4} --source-max {5}'.format(
             KEYSTORES_GENERATION_TOOL_NAME,
             PRYSM_PASSWORD,
@@ -217,7 +219,8 @@ def generate_valdiator_keystores_in_parallel(plan, mnemonic, participants):
         )
         finished_files_to_verify.append(generation_finished_filepath)
 
-        generate_keystores_cmd = 'nohup {0} keystores --insecure --prysm-pass {1} --out-loc {2} --source-mnemonic "{3}" --source-min {4} --source-max {5} && touch {6}'.format(
+        # NOTE: removed --insecure flag
+        generate_keystores_cmd = 'nohup {0} keystores --prysm-pass {1} --out-loc {2} --source-mnemonic "{3}" --source-min {4} --source-max {5} && touch {6}'.format(
             KEYSTORES_GENERATION_TOOL_NAME,
             PRYSM_PASSWORD,
             output_dirpath,
