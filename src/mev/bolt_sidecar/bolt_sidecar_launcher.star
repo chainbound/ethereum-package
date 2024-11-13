@@ -56,6 +56,7 @@ def launch_bolt_sidecar(
                 "0x18d1c5302e734fd6fbfaa51828d42c4c6d3cbe020c42bab7dd15a2799cf00b82",
                 "--commitment-deadline",
                 str(100),
+                "--unsafe-disable-consensus-checks",
                 "--chain",
                 network_params.network,
                 "--slot-time",

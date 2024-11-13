@@ -872,6 +872,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                     "--builder.beacon_endpoints=http://cl-{0}-lighthouse-geth-builder:4000".format(
                         index_str
                     ),
+                    "--builder.verify_constraints=false",
                     "--builder.bellatrix_fork_version={0}".format(
                         constants.BELLATRIX_FORK_VERSION
                     ),
