@@ -3,7 +3,7 @@ static_files = import_module("../static_files/static_files.star")
 
 SERVICE_NAME = "grafana"
 
-IMAGE_NAME = "grafana/grafana-enterprise:9.5.12"
+IMAGE_NAME = "grafana/grafana-enterprise:11.1.0"
 
 HTTP_PORT_ID = "http"
 HTTP_PORT_NUMBER_UINT16 = 3000
