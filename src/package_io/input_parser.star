@@ -15,7 +15,7 @@ DEFAULT_EL_IMAGES = {
 }
 
 DEFAULT_CL_IMAGES = {
-    "lighthouse": "sigp/lighthouse:latest",
+    "lighthouse": "sigp/lighthouse:v5.3.0",
     "teku": "consensys/teku:latest",
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
     "prysm": "gcr.io/prysmaticlabs/prysm/beacon-chain:latest",
@@ -24,7 +24,7 @@ DEFAULT_CL_IMAGES = {
 }
 
 DEFAULT_VC_IMAGES = {
-    "lighthouse": "sigp/lighthouse:latest",
+    "lighthouse": "sigp/lighthouse:v5.3.0",
     "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "statusim/nimbus-validator-client:multiarch-latest",
     "prysm": "gcr.io/prysmaticlabs/prysm/validator:latest",
@@ -726,7 +726,7 @@ def get_default_mev_params():
         "bolt_boost_image": None,
         "mev_relay_image": MEV_BOOST_RELAY_DEFAULT_IMAGE,
         "mev_builder_image": "flashbots/builder:latest",
-        "mev_builder_cl_image": "sigp/lighthouse:latest",
+        "mev_builder_cl_image": "sigp/lighthouse:v5.3.0",
         "mev_boost_image": "flashbots/mev-boost",
         "mev_boost_args": ["mev-boost", "--relay-check"],
         "mev_relay_api_extra_args": [],
