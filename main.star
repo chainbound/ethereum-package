@@ -289,6 +289,7 @@ def run(plan, args={}):
                             "metrics_port": bolt_sidecar.BOLT_SIDECAR_METRICS_PORT,
                             "validator_keystore_files_artifact_uuid": participant.cl_context.validator_keystore_files_artifact_uuid,
                             "participant_index": index,
+                            "firewall_rpcs": mev_params.bolt_sidecar_firewall_rpcs,
                         }
 
                     if mev_params.bolt_boost_image == None:

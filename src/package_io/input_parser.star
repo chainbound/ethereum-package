@@ -254,6 +254,7 @@ def input_parser(plan, input_args):
             mev_builder_cl_image=result["mev_params"]["mev_builder_cl_image"],
             mev_boost_image=result["mev_params"]["mev_boost_image"],
             bolt_sidecar_image=result["mev_params"]["bolt_sidecar_image"],
+            bolt_sidecar_firewall_rpcs=result["mev_params"]["bolt_sidecar_firewall_rpcs"],
             mev_boost_args=result["mev_params"]["mev_boost_args"],
             mev_relay_api_extra_args=result["mev_params"]["mev_relay_api_extra_args"],
             mev_relay_housekeeper_extra_args=result["mev_params"][
@@ -732,6 +733,7 @@ def get_default_mev_params():
         "mev_relay_api_extra_args": [],
         "mev_relay_housekeeper_extra_args": [],
         "mev_relay_website_extra_args": [],
+        "bolt_sidecar_firewall_rpcs": [],
         "helix_relay_config_extension": None,
         "mev_builder_extra_args": None,
         "mev_flood_image": "flashbots/mev-flood",
