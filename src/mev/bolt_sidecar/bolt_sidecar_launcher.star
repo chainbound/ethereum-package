@@ -34,8 +34,10 @@ def launch_bolt_sidecar(
         config=ServiceConfig(
             image=image,
             cmd=[
-                "--port",
-                str(BOLT_SIDECAR_COMMITMENTS_API_PORT),
+                # "--port",
+                # str(BOLT_SIDECAR_COMMITMENTS_API_PORT),
+                "--firewall-rpcs",
+                "ws://host.docker.internal:8015/api/v1/firewall_stream",
                 "--execution-api-url",
                 sidecar_config["execution_api_url"],
                 "--beacon-api-url",
@@ -52,7 +54,7 @@ def launch_bolt_sidecar(
                 "0x0000000000000000000000000000000000000000",
                 "--builder-private-key", # Random private key for testing
                 "0x20c815cb2d37561479c7b6cae9737356b144760d00f1387bff17df4a3712c262",
-                "--commitment-private-key", # Random private key for testing
+                "--operator-private-key", # Random private key for testing
                 "0x18d1c5302e734fd6fbfaa51828d42c4c6d3cbe020c42bab7dd15a2799cf00b82",
                 "--commitment-deadline",
                 str(100),
@@ -71,9 +73,9 @@ def launch_bolt_sidecar(
             ],
             # + mev_params.mev_relay_api_extra_args,
             ports={
-                "api": PortSpec(
-                    number=BOLT_SIDECAR_COMMITMENTS_API_PORT, transport_protocol="TCP"
-                ),
+                # "api": PortSpec(
+                #     number=BOLT_SIDECAR_COMMITMENTS_API_PORT, transport_protocol="TCP"
+                # ),
                 "bolt-sidecar": PortSpec(
                     number=input_parser.BOLT_SIDECAR_CONSTRAINTS_PROXY_PORT, transport_protocol="TCP"
                 ),
