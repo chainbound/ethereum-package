@@ -16,7 +16,7 @@ BOLT_SIDECAR_MAX_MEMORY = 1024
 
 def launch_bolt_sidecar(
     plan,
-    image,
+    mev_params,
     sidecar_config,
     network_params,
     node_selectors,
@@ -29,60 +29,73 @@ def launch_bolt_sidecar(
     full_keystore_path = "{0}{1}/keys".format(BOLT_SIDECAR_KEYS_DIRMOUNT_PATH_ON_SERVICE, node_keystore_path)
     full_keystore_secrets_path = "{0}{1}/secrets".format(BOLT_SIDECAR_KEYS_DIRMOUNT_PATH_ON_SERVICE, node_keystore_path)
 
+    cmd = [
+        "--execution-api-url",
+        sidecar_config["execution_api_url"],
+        "--beacon-api-url",
+        sidecar_config["beacon_api_url"],
+        "--engine-api-url",
+        sidecar_config["engine_api_url"],
+        "--constraints-api-url",
+        sidecar_config["constraints_api_url"],
+        "--constraints-proxy-port",
+        str(input_parser.BOLT_SIDECAR_CONSTRAINTS_PROXY_PORT),
+        "--engine-jwt-hex",
+        sidecar_config["jwt_hex"],
+        "--fee-recipient",
+        "0x0000000000000000000000000000000000000000",
+        "--builder-private-key", # Random private key for testing
+        "0x20c815cb2d37561479c7b6cae9737356b144760d00f1387bff17df4a3712c262",
+        "--operator-private-key", # Random private key for testing
+        "0x18d1c5302e734fd6fbfaa51828d42c4c6d3cbe020c42bab7dd15a2799cf00b82",
+        "--commitment-deadline",
+        str(100),
+        "--chain",
+        network_params.network,
+        "--slot-time",
+        str(network_params.seconds_per_slot),
+        # "--keystore-password",
+        # validator_keystore_generator.PRYSM_PASSWORD,
+        "--keystore-secrets-path",
+        full_keystore_secrets_path,
+        "--keystore-path",
+        full_keystore_path,
+        "--metrics-port",
+        str(BOLT_SIDECAR_METRICS_PORT),
+    ]
+
+    ports={
+        "bolt-sidecar": PortSpec(
+            number=input_parser.BOLT_SIDECAR_CONSTRAINTS_PROXY_PORT, transport_protocol="TCP"
+        ),
+        "metrics": PortSpec(
+            number=BOLT_SIDECAR_METRICS_PORT, transport_protocol="TCP"
+        ),
+    }
+
+    extra_params = mev_params.bolt_sidecar_extra_params
+
+    if extra_params != None:
+        if "firewall_rpcs" in extra_params:
+            firewall_rpcs = extra_params["firewall_rpcs"]
+            cmd.append("--firewall-rpcs")
+            cmd.append(firewall_rpcs)
+        else:
+            cmd.append("--port")
+            cmd.append(str(BOLT_SIDECAR_COMMITMENTS_API_PORT))
+            ports["api"] = PortSpec(
+                number=BOLT_SIDECAR_COMMITMENTS_API_PORT, transport_protocol="TCP"
+            )
+
+
+
     api = plan.add_service(
         name=sidecar_config["service_name"],
         config=ServiceConfig(
-            image=image,
-            cmd=[
-                # "--port",
-                # str(BOLT_SIDECAR_COMMITMENTS_API_PORT),
-                "--firewall-rpcs",
-                "ws://host.docker.internal:8015/api/v1/firewall_stream",
-                "--execution-api-url",
-                sidecar_config["execution_api_url"],
-                "--beacon-api-url",
-                sidecar_config["beacon_api_url"],
-                "--engine-api-url",
-                sidecar_config["engine_api_url"],
-                "--constraints-api-url",
-                sidecar_config["constraints_api_url"],
-                "--constraints-proxy-port",
-                str(input_parser.BOLT_SIDECAR_CONSTRAINTS_PROXY_PORT),
-                "--engine-jwt-hex",
-                sidecar_config["jwt_hex"],
-                "--fee-recipient",
-                "0x0000000000000000000000000000000000000000",
-                "--builder-private-key", # Random private key for testing
-                "0x20c815cb2d37561479c7b6cae9737356b144760d00f1387bff17df4a3712c262",
-                "--operator-private-key", # Random private key for testing
-                "0x18d1c5302e734fd6fbfaa51828d42c4c6d3cbe020c42bab7dd15a2799cf00b82",
-                "--commitment-deadline",
-                str(100),
-                "--chain",
-                network_params.network,
-                "--slot-time",
-                str(network_params.seconds_per_slot),
-                # "--keystore-password",
-                # validator_keystore_generator.PRYSM_PASSWORD,
-                "--keystore-secrets-path",
-                full_keystore_secrets_path,
-                "--keystore-path",
-                full_keystore_path,
-                "--metrics-port",
-                str(BOLT_SIDECAR_METRICS_PORT),
-            ],
+            image=mev_params.bolt_sidecar_image,
+            cmd=cmd,
             # + mev_params.mev_relay_api_extra_args,
-            ports={
-                # "api": PortSpec(
-                #     number=BOLT_SIDECAR_COMMITMENTS_API_PORT, transport_protocol="TCP"
-                # ),
-                "bolt-sidecar": PortSpec(
-                    number=input_parser.BOLT_SIDECAR_CONSTRAINTS_PROXY_PORT, transport_protocol="TCP"
-                ),
-                "metrics": PortSpec(
-                    number=BOLT_SIDECAR_METRICS_PORT, transport_protocol="TCP"
-                ),
-            },
+            ports=ports,
             files={
                 BOLT_SIDECAR_KEYS_DIRMOUNT_PATH_ON_SERVICE: sidecar_config["validator_keystore_files_artifact_uuid"],
             },
