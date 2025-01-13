@@ -254,6 +254,7 @@ def input_parser(plan, input_args):
             mev_builder_cl_image=result["mev_params"]["mev_builder_cl_image"],
             mev_boost_image=result["mev_params"]["mev_boost_image"],
             bolt_sidecar_image=result["mev_params"]["bolt_sidecar_image"],
+            bolt_sidecar_extra_params=result["mev_params"]["bolt_sidecar_extra_params"],
             mev_boost_args=result["mev_params"]["mev_boost_args"],
             mev_relay_api_extra_args=result["mev_params"]["mev_relay_api_extra_args"],
             mev_relay_housekeeper_extra_args=result["mev_params"][
@@ -724,6 +725,8 @@ def default_participant():
 def get_default_mev_params():
     return {
         "bolt_boost_image": None,
+        "bolt_sidecar_image": None,
+        "bolt_sidecar_extra_params": {},
         "mev_relay_image": MEV_BOOST_RELAY_DEFAULT_IMAGE,
         "mev_builder_image": "flashbots/builder:latest",
         "mev_builder_cl_image": "sigp/lighthouse:latest",

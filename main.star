@@ -356,7 +356,7 @@ def run(plan, args={}):
                         bolt_sidecar_config["service_name"] = service_name
                         bolt_sidecar_context = bolt_sidecar.launch_bolt_sidecar(
                             plan,
-                            mev_params.bolt_sidecar_image,
+                            mev_params,
                             bolt_sidecar_config,
                             network_params,
                             global_node_selectors,
