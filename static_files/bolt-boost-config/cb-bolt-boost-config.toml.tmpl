@@ -21,6 +21,11 @@ docker_image = "{{ .image }}"
 # OPTIONAL, DEFAULT: false
 with_signer = {{ or .with_signer false }}
 
+# Host to receive BuilderAPI calls from beacon node
+# OPTIONAL, DEFAULT: 127.0.0.1.
+# But this should be set to 0.0.0.0 instead to allow external access!
+host = "0.0.0.0"
+
 # Port to receive BuilderAPI calls from beacon node
 port = {{ .port }}
 
