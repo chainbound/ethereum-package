@@ -29,6 +29,9 @@ def launch_bolt_sidecar(
     full_keystore_path = "{0}{1}/keys".format(BOLT_SIDECAR_KEYS_DIRMOUNT_PATH_ON_SERVICE, node_keystore_path)
     full_keystore_secrets_path = "{0}{1}/secrets".format(BOLT_SIDECAR_KEYS_DIRMOUNT_PATH_ON_SERVICE, node_keystore_path)
 
+    # 2/3 of the slot time, in milliseconds
+    commitment_deadline = int((network_params.seconds_per_slot * 2 / 3) * 1000)
+
     cmd = [
         "--execution-api-url",
         sidecar_config["execution_api_url"],
@@ -49,7 +52,7 @@ def launch_bolt_sidecar(
         "--operator-private-key", # Random private key for testing
         "0x18d1c5302e734fd6fbfaa51828d42c4c6d3cbe020c42bab7dd15a2799cf00b82",
         "--commitment-deadline",
-        str(100),
+        str(commitment_deadline),
         "--chain",
         network_params.network,
         "--slot-time",
